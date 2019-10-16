@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 	strcpy(kc_map.grid, grid);
 
 	kc_player.unit_x = 96;
-	kc_player.unit_y = 96;
+	kc_player.unit_y = 224;
 	kc_player.fov = 60.0;
 	kc_player.view_angle = 45.0;
 
