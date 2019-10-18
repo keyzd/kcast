@@ -13,6 +13,9 @@ int main(int argc, char **argv)
 	kc_map_t kc_map;
 	char *grid;
 
+	int map_view;
+	map_view = 0;
+
 	kc_player_t kc_player;
 
 	SDL_Window *sdl_win;
@@ -54,16 +57,18 @@ int main(int argc, char **argv)
 	);
 
 	kc_map.block = 64;
-	kc_map.grid_w = 6;
-	kc_map.grid_h = 6;
+	kc_map.grid_w = 8;
+	kc_map.grid_h = 8;
 	kc_map.grid = malloc(kc_map.grid_w * kc_map.grid_h * sizeof(char));
 	grid = 
-		"111111"\
-		"1    1"\
-		"1    1"\
-		"1    1"\
-		"1    1"\
-		"111111";
+		"44444444"\
+		"4      4"\
+		"4  1   4"\
+		"4   2  4"\
+		"4    3 4"\
+		"4      4"\
+		"4      4"\
+		"44444444";
 	strcpy(kc_map.grid, grid);
 
 	kc_player.unit_x = 96;
@@ -80,6 +85,55 @@ int main(int argc, char **argv)
 			{
 				kc_run = 0;
 			}
+			else if(sdl_event.type == SDL_KEYDOWN)
+			{
+				switch(sdl_event.key.keysym.sym)
+				{
+					case SDLK_SPACE:
+						if(map_view) map_view = 0;
+						else map_view = 1;
+						break;
+
+					case SDLK_LEFT:
+						kc_player.view_angle += 3;
+						if(kc_player.view_angle > 360)
+						{
+							int tmp = kc_player.view_angle - 357;
+							kc_player.view_angle = -3 + tmp;
+						}
+						printf("View angle: %f\n", kc_player.view_angle);
+						break;
+
+					case SDLK_p:
+						printf("View angle: %f\n", kc_player.view_angle);
+					break;
+
+					case SDLK_RIGHT:
+						kc_player.view_angle -= 3;
+						if(kc_player.view_angle < 0)
+						{
+							kc_player.view_angle = 354 - kc_player.view_angle;
+						}
+						printf("View angle: %f\n", kc_player.view_angle);
+						break;
+
+					case SDLK_w:
+						kc_player.unit_y -= 2;
+						break;
+
+					case SDLK_s:
+						kc_player.unit_y += 2;
+						break;
+
+					case SDLK_a:
+						kc_player.unit_x -= 2;
+						break;
+
+					case SDLK_d:
+						kc_player.unit_x += 2;
+						break;
+				}
+			}
 		}
 
 /*
@@ -88,7 +142,10 @@ int main(int argc, char **argv)
 ========================================================================
 */
 
-		kc_3d_refresh(&kc_screen, &kc_map, &kc_player);
+		if(map_view)
+			kc_map_view_update(&kc_screen, &kc_map, &kc_player);
+		else
+			kc_3d_refresh(&kc_screen, &kc_map, &kc_player);
 
 /*
 ========================================================================

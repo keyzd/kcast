@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <math.h>
 
 /*
 ========================================================================
@@ -9,8 +10,8 @@
 /* ARGB pixel format */
 #define KC_PACK_COLOR(R, G, B) ( ( 255<<24) |( R<<16 ) | ( G<<8 ) | B )
 
-#define DEG2RAD(a) ( 3.14159265/180 * a )
-#define RAD2DEG(a) ( 180/3.14159265 * a )
+#define DEG2RAD(a) ( M_PI/180 * a )
+#define RAD2DEG(a) ( 180/M_PI * a )
 
 
 /*
@@ -51,13 +52,65 @@ typedef struct kc_player_s kc_player_t;
 ========================================================================
 */
 
-void kc_3d_refresh(kc_screen_t *kc_screen, kc_map_t *kc_map, kc_player_t *kc_player); /* Main rendering function */
-void kc_clear_screen(kc_screen_t *kc_screen, kc_map_t *kc_map); /* Draw floor and ceiling */
-void kc_wall_refresh(kc_screen_t *kc_screen, kc_map_t *kc_map, kc_player_t *kc_player);
+/* Main rendering function */
+void kc_3d_refresh(
+		kc_screen_t *kc_screen,
+		kc_map_t *kc_map,
+		kc_player_t *kc_player);
 
-int kc_raycast(kc_map_t* kc_map, kc_player_t *kc_player, uint32_t *column_col, float angle); /* Get the ray lenght */
-int kc_verticalgrid_intersection(kc_map_t* kc_map, kc_player_t *kc_player, uint32_t *column_col, float angle);
-int kc_horizontalgrid_intersection(kc_map_t* kc_map, kc_player_t *kc_player, uint32_t *column_col, float angle);
+/* Draw floor and ceiling */
+void kc_clear_screen(
+		kc_screen_t *kc_screen, 
+		kc_map_t *kc_map);
 
-int kc_get_column_len(kc_screen_t *kc_screen, int ray_len, uint32_t *column_col);
-void kc_draw_column(kc_screen_t *kc_screen, int column_len, uint32_t column_col, int column_x);
+void kc_wall_refresh(
+		kc_screen_t *kc_screen,
+		kc_map_t *kc_map,
+		kc_player_t *kc_player);
+
+/* Main raycasting function */
+int kc_raycast(kc_map_t* kc_map,
+		kc_player_t *kc_player,
+		uint32_t *column_col,
+		float angle);
+
+float kc_verticalgrid_intersection(
+		kc_map_t* kc_map,
+		kc_player_t *kc_player,
+		float angle);
+
+float kc_horizontalgrid_intersection(
+		kc_map_t* kc_map,
+		kc_player_t *kc_player,
+		float angle);
+
+int kc_get_column_len(
+		kc_screen_t *kc_screen, 
+		int ray_len,
+		uint32_t *column_col);
+
+void kc_draw_column(
+		kc_screen_t *kc_screen, 
+		int column_len,
+		uint32_t column_col,
+		int column_x);
+
+/*
+========================================================================
+						KC_DEBUG DEFINITIONS
+========================================================================
+*/
+void kc_map_view_update(
+		kc_screen_t *kc_screen,
+		kc_map_t *kc_map,
+		kc_player_t *kc_player);
+
+void kc_map_view_walls(
+		kc_screen_t *kc_screen,
+		kc_map_t *kc_map,
+		kc_player_t *kc_player);
+
+void kc_map_view_player(
+		kc_screen_t *kc_screen,
+		kc_map_t *kc_map,
+		kc_player_t *kc_player);
