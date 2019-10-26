@@ -26,11 +26,11 @@ void kc_map_view_walls(
 		kc_map_t *kc_map,
 		kc_player_t *kc_player)
 {
-	for(unsigned int i = 0; i < kc_map->grid_w * kc_map->grid_h; i++)
+	for(uint32_t i = 0; i < kc_map->grid_w * kc_map->grid_h; i++)
 	{
 		if(kc_map->grid[i] != ' ')
 		{
-			unsigned int level, first_reduced, first_origin, address;
+			uint32_t level, first_reduced, first_origin, address;
 
 			level = i / kc_map->grid_w;
 			first_reduced = level * kc_map->grid_w;
@@ -38,26 +38,30 @@ void kc_map_view_walls(
 
 			address = first_origin + ( (i - first_reduced) * kc_map->block );
 
-			for(unsigned int j = 0; j < kc_map->block; j++)
+			for(uint32_t j = 0; j < kc_map->block; j++)
 			{
-				for(unsigned int k = address; k < address+(kc_map->block); k++)
+				for(uint32_t k = address; k < address+(kc_map->block); k++)
 				{
 					switch(kc_map->grid[i])
 					{
 						case '1':
-							kc_screen->pixels[k] = KC_PACK_COLOR(192, 0, 0);
+							kc_screen->pixels[k] =
+								KC_PACK_COLOR(192, 0, 0);
 							break;
 
 						case '2':
-							kc_screen->pixels[k] = KC_PACK_COLOR(0, 192, 0);
+							kc_screen->pixels[k] =
+								KC_PACK_COLOR(0, 192, 0);
 							break;
 
 						case '3':
-							kc_screen->pixels[k] = KC_PACK_COLOR(0, 0, 192);
+							kc_screen->pixels[k] =
+								KC_PACK_COLOR(0, 0, 192);
 							break;
 
 						case '4':
-							kc_screen->pixels[k] = KC_PACK_COLOR(192, 192, 192);
+							kc_screen->pixels[k] =
+								KC_PACK_COLOR(192, 192, 192);
 							break;
 					}
 				}
@@ -81,6 +85,19 @@ void kc_map_view_player(
 					(kc_player->unit_x+j)+(kc_player->unit_y+i)*kc_screen->w
 					] = KC_PACK_COLOR(255, 255, 255);
 
+		}
+	}
+}
+
+void kc_intersect_draw(kc_screen_t *kc_screen, int x, int y, uint32_t color)
+{
+	if(x >= kc_screen->w || y >= kc_screen->h || x < 0 || y < 0)
+		return;
+	for(int i = 0; i < 3; i++)
+	{
+		for(int j = 0; j < 3; j++)
+		{
+			kc_screen->pixels[(x+j)+(y+i)*kc_screen->w] = color;
 		}
 	}
 }

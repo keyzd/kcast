@@ -56,12 +56,13 @@ int main(int argc, char **argv)
 		kc_screen.h
 	);
 
-	kc_map.block = 64;
-	kc_map.grid_w = 8;
-	kc_map.grid_h = 8;
+	kc_map.block = 32;
+	kc_map.grid_w = 16;
+	kc_map.grid_h = 16;
 	kc_map.grid = malloc(kc_map.grid_w * kc_map.grid_h * sizeof(char));
 	grid = 
-		"44444444"\
+		/*
+		"44412344"\
 		"4      4"\
 		"4  1   4"\
 		"4   2  4"\
@@ -69,12 +70,29 @@ int main(int argc, char **argv)
 		"4      4"\
 		"4      4"\
 		"44444444";
+		*/
+		"4111111111111111"\
+		"4              2"\
+		"4     11111    2"\
+		"4    2         2"\
+		"4    2  33331112"\
+		"4    2         2"\
+		"4  221333      2"\
+		"4  3    24444  2"\
+		"4  3    2      2"\
+		"4  3    2  31432"\
+		"4  3    2      2"\
+		"4       2      2"\
+		"4 1111111      2"\
+		"4              2"\
+		"4              2"\
+		"3333333333333332";
 	strcpy(kc_map.grid, grid);
 
-	kc_player.unit_x = 96;
-	kc_player.unit_y = 224;
-	kc_player.fov = 60.0;
-	kc_player.view_angle = 45.0;
+	kc_player.unit_x = 64;
+	kc_player.unit_y = 64;
+	kc_player.fov = 60.000;
+	kc_player.view_angle = 90.0;
 
 	kc_run = 1;
 	while(kc_run)
@@ -118,19 +136,31 @@ int main(int argc, char **argv)
 						break;
 
 					case SDLK_w:
-						kc_player.unit_y -= 2;
+						kc_player.unit_x +=
+							2*cos(DEG2RAD(kc_player.view_angle));
+						kc_player.unit_y -=
+							2*sin(DEG2RAD(kc_player.view_angle));
 						break;
 
 					case SDLK_s:
-						kc_player.unit_y += 2;
+						kc_player.unit_x -=
+							2*sin(M_PI_2 + DEG2RAD(kc_player.view_angle));
+						kc_player.unit_y -=
+							2*cos(M_PI_2 + DEG2RAD(kc_player.view_angle));
 						break;
 
 					case SDLK_a:
-						kc_player.unit_x -= 2;
+						kc_player.unit_x -=
+							2*sin(DEG2RAD(kc_player.view_angle));
+						kc_player.unit_y -=
+							2*cos(DEG2RAD(kc_player.view_angle));
 						break;
 
 					case SDLK_d:
-						kc_player.unit_x += 2;
+						kc_player.unit_x +=
+							2*sin(DEG2RAD(kc_player.view_angle));
+						kc_player.unit_y +=
+							2*cos(DEG2RAD(kc_player.view_angle));
 						break;
 				}
 			}

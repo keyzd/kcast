@@ -9,8 +9,6 @@ OBJMODULES = $(SRCMODULES:.c=.o)
 %.o: %.c %.h
 	$(CC) $(CFLAGS) $< -c -o $@
 
-kc_renderer.o: kc_renderer.c kcast.h
-
 kcast: $(OBJMODULES)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
