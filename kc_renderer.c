@@ -1,3 +1,6 @@
+/*
+	Branch: alternate things
+*/
 #include <math.h>
 #include <stdio.h>
 
@@ -74,8 +77,6 @@ int kc_raycast(
 		return (int)len_horiz;
 	}
 }
-
-//123
 
 float kc_horizontalgrid_intersection(
 		kc_screen_t *kc_screen,
