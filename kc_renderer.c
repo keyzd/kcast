@@ -75,6 +75,8 @@ int kc_raycast(
 	}
 }
 
+//123
+
 float kc_horizontalgrid_intersection(
 		kc_screen_t *kc_screen,
 		kc_map_t* kc_map, 
