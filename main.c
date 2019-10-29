@@ -1,3 +1,6 @@
+/*
+	Branch: new rendering approach (via SDL2 Renderer API)
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,8 +12,8 @@
 int main(int argc, char **argv)
 {
 	int kc_run;
-	kc_screen_t kc_screen;
 	kc_map_t kc_map;
+	int win_w, win_h;
 	char *grid;
 
 	int map_view;
@@ -32,9 +35,8 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	kc_screen.w = atoi(argv[1]);
-	kc_screen.h = atoi(argv[2]);
-	kc_screen.pixels = malloc(kc_screen.w * kc_screen.h * sizeof(uint32_t));
+	win_w = atoi(argv[1]);
+	win_h = atoi(argv[2]);
 
 	SDL_Init(SDL_INIT_VIDEO);
 	sdl_win = SDL_CreateWindow
@@ -42,8 +44,8 @@ int main(int argc, char **argv)
 		"KCast",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
-		kc_screen.w,
-		kc_screen.h,
+		win_w,
+		win_h,
 		SDL_WINDOW_SHOWN
 	);
 	sdl_rend = SDL_CreateRenderer(sdl_win, -1, SDL_RENDERER_ACCELERATED);
@@ -52,8 +54,8 @@ int main(int argc, char **argv)
 		sdl_rend,
 		SDL_PIXELFORMAT_ARGB8888,
 		SDL_TEXTUREACCESS_STREAMING,
-		kc_screen.w,
-		kc_screen.h
+		win_w,
+		win_h
 	);
 
 	kc_map.block = 64;
@@ -122,6 +124,7 @@ int main(int argc, char **argv)
 	kc_player.unit_y = 224;
 	kc_player.fov = 60.00;
 	kc_player.view_angle = 90.00;
+
 
 	kc_run = 1;
 	while(kc_run)
@@ -201,27 +204,16 @@ int main(int argc, char **argv)
 ========================================================================
 */
 
-		if(map_view)
-			kc_map_view_update(&kc_screen, &kc_map, &kc_player);
-		else
-			kc_3d_refresh(&kc_screen, &kc_map, &kc_player);
-
 /*
 ========================================================================
 						SDL UPDATES
 ========================================================================
 */
-		SDL_UpdateTexture
-		(
-			screen_sdl_text,
-			NULL,
-			kc_screen.pixels,
-			kc_screen.w * sizeof(uint32_t)
-		);
 
 
 		SDL_RenderClear(sdl_rend);
 		SDL_RenderCopy(sdl_rend, screen_sdl_text, NULL, NULL);
+		kc_3d_refresh(win_w, win_h, sdl_rend, &kc_map, &kc_player);
 		SDL_RenderPresent(sdl_rend);
 
 		SDL_Delay(60);
@@ -230,7 +222,6 @@ int main(int argc, char **argv)
 	SDL_DestroyTexture(screen_sdl_text);
 	SDL_DestroyRenderer(sdl_rend);
 	SDL_DestroyWindow(sdl_win);
-	free(kc_screen.pixels);
 	free(kc_map.grid);
 	return 0;
 }
