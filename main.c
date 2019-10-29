@@ -56,9 +56,9 @@ int main(int argc, char **argv)
 		kc_screen.h
 	);
 
-	kc_map.block = 32;
-	kc_map.grid_w = 16;
-	kc_map.grid_h = 16;
+	kc_map.block = 64;
+	kc_map.grid_w = 8;
+	kc_map.grid_h = 8;
 	kc_map.grid = malloc(kc_map.grid_w * kc_map.grid_h * sizeof(char));
 	grid = 
 		/*
@@ -71,6 +71,7 @@ int main(int argc, char **argv)
 		"4      4"\
 		"44444444";
 		*/
+		/*
 		"4111111111111111"\
 		"4              2"\
 		"4     11111    2"\
@@ -87,12 +88,40 @@ int main(int argc, char **argv)
 		"4              2"\
 		"4              2"\
 		"3333333333333332";
+		*/
+		/*
+		"4111111111111111"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"4              2"\
+		"3333333333333332";
+		*/
+		"11111111"\
+		"2      2"\
+		"2      2"\
+		"2      2"\
+		"2      2"\
+		"2      2"\
+		"2      2"\
+		"11111111";
+
 	strcpy(kc_map.grid, grid);
 
-	kc_player.unit_x = 64;
-	kc_player.unit_y = 64;
-	kc_player.fov = 60.000;
-	kc_player.view_angle = 90.0;
+	kc_player.unit_x = 96;
+	kc_player.unit_y = 224;
+	kc_player.fov = 60.00;
+	kc_player.view_angle = 90.00;
 
 	kc_run = 1;
 	while(kc_run)
@@ -119,12 +148,10 @@ int main(int argc, char **argv)
 							int tmp = kc_player.view_angle - 357;
 							kc_player.view_angle = -3 + tmp;
 						}
+						if(kc_player.view_angle == 360)
+							kc_player.view_angle = 0;
 						printf("View angle: %f\n", kc_player.view_angle);
 						break;
-
-					case SDLK_p:
-						printf("View angle: %f\n", kc_player.view_angle);
-					break;
 
 					case SDLK_RIGHT:
 						kc_player.view_angle -= 3;
@@ -132,6 +159,8 @@ int main(int argc, char **argv)
 						{
 							kc_player.view_angle = 354 - kc_player.view_angle;
 						}
+						if(kc_player.view_angle == 360)
+							kc_player.view_angle = 0;
 						printf("View angle: %f\n", kc_player.view_angle);
 						break;
 
@@ -189,9 +218,13 @@ int main(int argc, char **argv)
 			kc_screen.pixels,
 			kc_screen.w * sizeof(uint32_t)
 		);
+
+
 		SDL_RenderClear(sdl_rend);
 		SDL_RenderCopy(sdl_rend, screen_sdl_text, NULL, NULL);
 		SDL_RenderPresent(sdl_rend);
+
+		SDL_Delay(60);
 	}
 
 	SDL_DestroyTexture(screen_sdl_text);
