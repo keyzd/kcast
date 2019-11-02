@@ -2,6 +2,8 @@
 #include <math.h>
 #include <SDL2/SDL.h>
 
+int kc_debug;
+
 /*
 ========================================================================
 							MACROS
@@ -123,6 +125,7 @@ float kc_horizontalgrid_intersection(
 		float angle);
 
 int kc_get_column_len(
+		kc_map_t *kc_map,
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend, 
 		kc_player_t *kc_player_t,

@@ -22,6 +22,7 @@ void kc_clear_screen(
 {
 	SDL_Rect screen_rect1, screen_rect2;
 
+	/*
 	screen_rect1.x = 0;
 	screen_rect1.y = 0;
 	screen_rect1.w = win_w;
@@ -37,15 +38,14 @@ void kc_clear_screen(
 
 	SDL_SetRenderDrawColor(sdl_rend, 96, 96, 96, 255);
 	SDL_RenderFillRect(sdl_rend, &screen_rect2);
+	*/
 
-	/*
 	screen_rect1.x = 0;
 	screen_rect1.y = 0;
 	screen_rect1.w = win_w;
 	screen_rect1.h = win_h;
 	SDL_SetRenderDrawColor(sdl_rend, 0, 0, 0, 255);
 	SDL_RenderFillRect(sdl_rend, &screen_rect1);
-	*/
 }
 
 void kc_wall_refresh(
@@ -69,8 +69,8 @@ void kc_wall_refresh(
 	for(column_x = 0; column_x < win_w; column_x++)
 	{
 		ray_len = kc_raycast(&wall_i, &side, sdl_rend, kc_map,
-						kc_player, &column_col, angle);
-		column_len = kc_get_column_len(win_w, win_h,sdl_rend,
+						kc_player, &column_col, (int)angle);
+		column_len = kc_get_column_len(kc_map, win_w, win_h,sdl_rend,
 						kc_player, (int)angle, ray_len, &column_col);
 		kc_draw_column(mt, wall_i, side, win_w, win_h, sdl_rend,
 			column_len, column_col, column_x);
@@ -98,13 +98,11 @@ int kc_raycast(
 		kc_horizontalgrid_intersection(&wall_i_horiz, &side_horiz, sdl_rend,
 									   kc_map, kc_player, &color_horiz, angle);
 
-	/*
 	kc_intersect_draw(
 		512, 512,
 		sdl_rend,
 		kc_player->unit_x, kc_player->unit_y,
 		KC_PACK_COLOR(255, 255, 255));
-	*/
 
 	if(len_vert < len_horiz)
 	{
@@ -137,6 +135,11 @@ float kc_horizontalgrid_intersection(
 	int rayX, rayY;
 	float rayLen;
 	int hit;
+	int prevX, prevY;
+	int mapH, mapW;
+
+	mapH = kc_map->block * kc_map->grid_h;
+	mapW = kc_map->block * kc_map->grid_w;
 
 	/* There's no horizontal block sides */
 	if((int)angle == 180 || (int)angle == 360 || (int)angle == 0)
@@ -171,31 +174,30 @@ float kc_horizontalgrid_intersection(
 		currentGridX = currentX / kc_map->block;
 		currentGridY = currentY / kc_map->block;
 
-		/*
 		kc_intersect_draw(
 			512, 512,
 			sdl_rend,
 			currentX, currentY,
 			KC_PACK_COLOR(0, 128, 0));
-		*/
-
+		
 		if(kc_map->grid[currentGridX+currentGridY*kc_map->grid_w] != ' ')
 		{ 
-			/*
 			kc_intersect_draw(
 				512, 512,
 				sdl_rend,
 				currentX, currentY,
 				KC_PACK_COLOR(0, 255, 0));
-			*/
 
 			hit = 1;
 		}
 		else
 		{
+			prevX = currentX;
+			prevY = currentY;
 			currentX += deltaX;
 			currentY += deltaY;
 		}
+
 	}
 
 	switch(kc_map->grid[currentGridX+currentGridY*kc_map->grid_w])
@@ -249,6 +251,11 @@ float kc_verticalgrid_intersection(
 	int rayX, rayY;
 	float rayLen;
 	int hit;
+	int prevX, prevY;
+	int mapH, mapW;
+
+	mapH = kc_map->block * kc_map->grid_h;
+	mapW = kc_map->block * kc_map->grid_w;
 
 	/* There's no vertical block sides */
 	if((int)angle == 90 || (int)angle == 270)
@@ -282,31 +289,30 @@ float kc_verticalgrid_intersection(
 		currentGridX = currentX / kc_map->block;
 		currentGridY = currentY / kc_map->block;
 
-		/*
 		kc_intersect_draw(
 			512, 512,
 			sdl_rend,
 			currentX, currentY,
 			KC_PACK_COLOR(128, 0, 0));
-		*/
 
 		if(kc_map->grid[currentGridX+currentGridY*kc_map->grid_w] != ' ')
 		{
-			/*
 			kc_intersect_draw(
 				512, 512,
 				sdl_rend,
 				currentX, currentY,
 				KC_PACK_COLOR(255, 0, 0));
-			*/
 
 			hit = 1;
 		}
 		else
 		{
+			prevX = currentX;
+			prevY = currentY;
 			currentX += deltaX;
 			currentY += deltaY;
 		}
+
 	}
 
 	switch(kc_map->grid[currentGridX+currentGridY*kc_map->grid_w])
@@ -347,6 +353,7 @@ float kc_verticalgrid_intersection(
 }
 
 int kc_get_column_len(
+		kc_map_t *kc_map,
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend, 
 		kc_player_t *kc_player,
@@ -355,7 +362,8 @@ int kc_get_column_len(
 		uint32_t *column_col)
 {
 	float len;
-	len = 24 * win_h / ray_len;
+	ray_len *= cos(DEG2RAD((int)(angle)));
+	len = kc_map->block * win_h / ray_len;
 	return (int)len;
 }
 
@@ -398,12 +406,14 @@ void kc_draw_column(
 	wall_rect_src.h = 64;
 	wall_rect_src.w = 1;
 	
-	/*
-	SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
-	SDL_RenderDrawLine(sdl_rend, column_x, y_start, column_x, y_end);
-	*/
-
-	wall_text = kc_maptext_find(mt, wall);
-
-	SDL_RenderCopy(sdl_rend, wall_text, &wall_rect_src, &wall_rect_dst);
+	if(kc_debug)
+	{
+		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
+		SDL_RenderDrawLine(sdl_rend, column_x, y_start, column_x, y_end);
+	}
+	else
+	{
+		wall_text = kc_maptext_find(mt, wall);
+		SDL_RenderCopy(sdl_rend, wall_text, &wall_rect_src, &wall_rect_dst);
+	}
 }

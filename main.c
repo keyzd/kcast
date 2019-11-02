@@ -9,11 +9,16 @@
 
 int main(int argc, char **argv)
 {
+	kc_debug = 1;
 	int kc_run;
 	kc_map_t kc_map;
 	int win_w, win_h;
 	char *grid;
 	int fullscreen;
+
+	uint32_t oldtime, realtime, frames;
+	float fps;
+	frames = 0;
 
 	kc_maptext_t maptext;
 
@@ -25,7 +30,7 @@ int main(int argc, char **argv)
 	SDL_Window *sdl_win;
 	SDL_Renderer *sdl_rend;
 	SDL_Texture *screen_sdl_text;
-	SDL_Texture *wall_brick1, *wall_brick2;
+	SDL_Texture *wall_brick1, *wall_brick2, *wall_test;
 	SDL_Event sdl_event;
 
 	if(argc < 4)
@@ -69,14 +74,15 @@ int main(int argc, char **argv)
 
 	wall_brick1 = loadTexture("../brick.png", sdl_rend);
 	wall_brick2 = loadTexture("../brick2.png", sdl_rend);
+	wall_test = loadTexture("../wall.png", sdl_rend);
 
 	kc_maptext_init(&maptext);
 	kc_maptext_insert(&maptext, '1', wall_brick1);
 	kc_maptext_insert(&maptext, '2', wall_brick2);
 	kc_maptext_insert(&maptext, '3', wall_brick1);
-	kc_maptext_insert(&maptext, '4', wall_brick2);
+	kc_maptext_insert(&maptext, '4', wall_test);
 
-	kc_map.block = 64;
+	kc_map.block = 32;
 	kc_map.grid_w = 16;
 	kc_map.grid_h = 16;
 	kc_map.grid = malloc(kc_map.grid_w * kc_map.grid_h * sizeof(char));
@@ -128,15 +134,19 @@ int main(int argc, char **argv)
 
 	strcpy(kc_map.grid, grid);
 
-	kc_player.unit_x = 96;
-	kc_player.unit_y = 224;
-	kc_player.fov = 60.00;
-	kc_player.view_angle = 90.00;
-
+	kc_player.unit_x = 2 * kc_map.block;
+	kc_player.unit_y = 2 * kc_map.block;
+	kc_player.fov = 60.0000;
+	kc_player.view_angle = 0.00;
 
 	kc_run = 1;
 	while(kc_run)
 	{
+		realtime = SDL_GetTicks();
+		fps = frames / (realtime / 1000.0);
+
+		printf("\rFPS: %.2f", fps);
+
 		while(SDL_PollEvent(&sdl_event) != 0)
 		{
 			if(sdl_event.type == SDL_QUIT)
@@ -147,10 +157,21 @@ int main(int argc, char **argv)
 			{
 				switch(sdl_event.key.keysym.sym)
 				{
-					case SDLK_SPACE:
+					/* DEBUG OPTIONS */
+
+					/* Textures */
+					case SDLK_t:
+						if(kc_debug) kc_debug = 0;
+						else kc_debug = 1;
+						break;
+
+					/* Map view */
+					case SDLK_m:
 						if(map_view) map_view = 0;
 						else map_view = 1;
 						break;
+
+					/* PLAYER CONTROLS */
 
 					case SDLK_LEFT:
 						kc_player.view_angle += 3;
@@ -161,7 +182,7 @@ int main(int argc, char **argv)
 						}
 						if(kc_player.view_angle == 360)
 							kc_player.view_angle = 0;
-						printf("View angle: %f\n", kc_player.view_angle);
+						//printf("View angle: %f\n", kc_player.view_angle);
 						break;
 
 					case SDLK_RIGHT:
@@ -172,35 +193,35 @@ int main(int argc, char **argv)
 						}
 						if(kc_player.view_angle == 360)
 							kc_player.view_angle = 0;
-						printf("View angle: %f\n", kc_player.view_angle);
+						//printf("View angle: %f\n", kc_player.view_angle);
 						break;
 
 					case SDLK_w:
 						kc_player.unit_x +=
-							2*cos(DEG2RAD(kc_player.view_angle));
+							8*cos(DEG2RAD(kc_player.view_angle));
 						kc_player.unit_y -=
-							2*sin(DEG2RAD(kc_player.view_angle));
+							8*sin(DEG2RAD(kc_player.view_angle));
 						break;
 
 					case SDLK_s:
 						kc_player.unit_x -=
-							2*sin(M_PI_2 + DEG2RAD(kc_player.view_angle));
+							8*sin(M_PI_2 + DEG2RAD(kc_player.view_angle));
 						kc_player.unit_y -=
-							2*cos(M_PI_2 + DEG2RAD(kc_player.view_angle));
+							8*cos(M_PI_2 + DEG2RAD(kc_player.view_angle));
 						break;
 
 					case SDLK_a:
 						kc_player.unit_x -=
-							2*sin(DEG2RAD(kc_player.view_angle));
+							8*sin(DEG2RAD(kc_player.view_angle));
 						kc_player.unit_y -=
-							2*cos(DEG2RAD(kc_player.view_angle));
+							8*cos(DEG2RAD(kc_player.view_angle));
 						break;
 
 					case SDLK_d:
 						kc_player.unit_x +=
-							2*sin(DEG2RAD(kc_player.view_angle));
+							8*sin(DEG2RAD(kc_player.view_angle));
 						kc_player.unit_y +=
-							2*cos(DEG2RAD(kc_player.view_angle));
+							8*cos(DEG2RAD(kc_player.view_angle));
 						break;
 				}
 			}
@@ -218,7 +239,10 @@ int main(int argc, char **argv)
 		else kc_map_view_update(win_w, win_h, sdl_rend, &kc_map, &kc_player);
 		SDL_RenderPresent(sdl_rend);
 
-		SDL_Delay(40);
+		oldtime = realtime;
+
+		SDL_Delay((1.0/60.0*1000));
+		frames++;
 	}
 
 	SDL_DestroyTexture(screen_sdl_text);

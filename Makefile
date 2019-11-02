@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall
+CFLAGS = -g
 LDFLAGS = -lSDL2 -lSDL2_image -lm
 
 PROGNAME = kcast
@@ -13,7 +13,7 @@ kcast: $(OBJMODULES)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 run: $(PROGNAME)
-	./kcast 800 600 0
+	./kcast 512 512 0
 
 clean:
 	rm -f *.o $(PROGNAME)
