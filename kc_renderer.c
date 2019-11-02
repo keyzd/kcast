@@ -69,9 +69,9 @@ void kc_wall_refresh(
 	for(column_x = 0; column_x < win_w; column_x++)
 	{
 		ray_len = kc_raycast(&wall_i, &side, sdl_rend, kc_map,
-						kc_player, &column_col, (int)angle);
+						kc_player, &column_col, angle);
 		column_len = kc_get_column_len(kc_map, win_w, win_h,sdl_rend,
-						kc_player, (int)angle, ray_len, &column_col);
+						kc_player, angle, ray_len, &column_col);
 		kc_draw_column(mt, wall_i, side, win_w, win_h, sdl_rend,
 			column_len, column_col, column_x);
 		angle -= angle_step;
@@ -142,7 +142,7 @@ float kc_horizontalgrid_intersection(
 	mapW = kc_map->block * kc_map->grid_w;
 
 	/* There's no horizontal block sides */
-	if((int)angle == 180 || (int)angle == 360 || (int)angle == 0)
+	if(abs((int)angle) == 180 || abs((int)angle) == 360 || abs((int)angle) == 0)
 		return 1000000.0;
 
 	/* Finding first horiz. intersection (point A) */
@@ -258,7 +258,7 @@ float kc_verticalgrid_intersection(
 	mapW = kc_map->block * kc_map->grid_w;
 
 	/* There's no vertical block sides */
-	if((int)angle == 90 || (int)angle == 270)
+	if(abs((int)angle) == 90 || abs((int)angle) == 270)
 		return 1000000.0;
 
 	/* Finding first horiz. intersection (point B) */
@@ -363,6 +363,8 @@ int kc_get_column_len(
 {
 	float len;
 	ray_len *= cos(DEG2RAD((int)(angle)));
+	if(ray_len <= 0)
+		ray_len = 1;
 	len = kc_map->block * win_h / ray_len;
 	return (int)len;
 }
