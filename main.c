@@ -1,11 +1,9 @@
-/*
-	Branch: new rendering approach (via SDL2 Renderer API)
-*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #include "kcast.h"
 
@@ -15,6 +13,9 @@ int main(int argc, char **argv)
 	kc_map_t kc_map;
 	int win_w, win_h;
 	char *grid;
+	int fullscreen;
+
+	kc_maptext_t maptext;
 
 	int map_view;
 	map_view = 0;
@@ -24,6 +25,7 @@ int main(int argc, char **argv)
 	SDL_Window *sdl_win;
 	SDL_Renderer *sdl_rend;
 	SDL_Texture *screen_sdl_text;
+	SDL_Texture *wall_brick1, *wall_brick2;
 	SDL_Event sdl_event;
 
 	if(argc < 4)
@@ -37,8 +39,15 @@ int main(int argc, char **argv)
 
 	win_w = atoi(argv[1]);
 	win_h = atoi(argv[2]);
+	fullscreen = atoi(argv[3]);
+
+	if(fullscreen)
+		fullscreen = SDL_WINDOW_FULLSCREEN_DESKTOP;
+	else fullscreen = 0;
 
 	SDL_Init(SDL_INIT_VIDEO);
+	IMG_Init(IMG_INIT_PNG);
+
 	sdl_win = SDL_CreateWindow
 	(
 		"KCast",
@@ -46,7 +55,7 @@ int main(int argc, char **argv)
 		SDL_WINDOWPOS_UNDEFINED,
 		win_w,
 		win_h,
-		SDL_WINDOW_SHOWN
+		SDL_WINDOW_SHOWN | fullscreen
 	);
 	sdl_rend = SDL_CreateRenderer(sdl_win, -1, SDL_RENDERER_ACCELERATED);
 	screen_sdl_text = SDL_CreateTexture
@@ -58,23 +67,21 @@ int main(int argc, char **argv)
 		win_h
 	);
 
+	wall_brick1 = loadTexture("../brick.png", sdl_rend);
+	wall_brick2 = loadTexture("../brick2.png", sdl_rend);
+
+	kc_maptext_init(&maptext);
+	kc_maptext_insert(&maptext, '1', wall_brick1);
+	kc_maptext_insert(&maptext, '2', wall_brick2);
+	kc_maptext_insert(&maptext, '3', wall_brick1);
+	kc_maptext_insert(&maptext, '4', wall_brick2);
+
 	kc_map.block = 64;
-	kc_map.grid_w = 8;
-	kc_map.grid_h = 8;
+	kc_map.grid_w = 16;
+	kc_map.grid_h = 16;
 	kc_map.grid = malloc(kc_map.grid_w * kc_map.grid_h * sizeof(char));
 	grid = 
-		/*
-		"44412344"\
-		"4      4"\
-		"4  1   4"\
-		"4   2  4"\
-		"4    3 4"\
-		"4      4"\
-		"4      4"\
-		"44444444";
-		*/
-		/*
-		"4111111111111111"\
+		"4121111111111111"\
 		"4              2"\
 		"4     11111    2"\
 		"4    2         2"\
@@ -90,7 +97,6 @@ int main(int argc, char **argv)
 		"4              2"\
 		"4              2"\
 		"3333333333333332";
-		*/
 		/*
 		"4111111111111111"\
 		"4              2"\
@@ -109,14 +115,16 @@ int main(int argc, char **argv)
 		"4              2"\
 		"3333333333333332";
 		*/
-		"11111111"\
-		"2      2"\
-		"2      2"\
-		"2      2"\
-		"2      2"\
-		"2      2"\
-		"2      2"\
-		"11111111";
+		/*
+		"12121212"\
+		"2      1"\
+		"1      2"\
+		"2      1"\
+		"1      2"\
+		"2      1"\
+		"1      2"\
+		"21212121";
+		*/
 
 	strcpy(kc_map.grid, grid);
 
@@ -197,26 +205,20 @@ int main(int argc, char **argv)
 				}
 			}
 		}
-
 /*
 ========================================================================
-						ENGINE UPDATES
+						SDL AND ENGINE UPDATES
 ========================================================================
 */
-
-/*
-========================================================================
-						SDL UPDATES
-========================================================================
-*/
-
 
 		SDL_RenderClear(sdl_rend);
 		SDL_RenderCopy(sdl_rend, screen_sdl_text, NULL, NULL);
-		kc_3d_refresh(win_w, win_h, sdl_rend, &kc_map, &kc_player);
+		if(!map_view)
+			kc_3d_refresh(&maptext, win_w, win_h, sdl_rend, &kc_map, &kc_player);
+		else kc_map_view_update(win_w, win_h, sdl_rend, &kc_map, &kc_player);
 		SDL_RenderPresent(sdl_rend);
 
-		SDL_Delay(60);
+		SDL_Delay(40);
 	}
 
 	SDL_DestroyTexture(screen_sdl_text);

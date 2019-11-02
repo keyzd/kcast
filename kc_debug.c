@@ -1,28 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <SDL2/SDL.h>
 
 #include "kcast.h"
 
 void kc_map_view_update(
-		kc_screen_t *kc_screen,
+		int win_w, int win_h,
+		SDL_Renderer *sdl_rend,
 		kc_map_t *kc_map,
 		kc_player_t *kc_player)
 {
-	int x;
+	SDL_Rect screen_rect;
 
-	for(x = 0; x < kc_screen->w * kc_screen->h; x++)
-	{
-		kc_screen->pixels[x] = KC_PACK_COLOR(16, 16, 16);
-	}
+	screen_rect.x = 0;
+	screen_rect.y = 0;
+	screen_rect.w = win_w;
+	screen_rect.h = win_h;
 
-	kc_map_view_walls(kc_screen, kc_map, kc_player);
-	kc_map_view_player(kc_screen, kc_map, kc_player);
-
+	SDL_SetRenderDrawColor(sdl_rend, 16, 16, 16, 255);
+	SDL_RenderFillRect(sdl_rend, &screen_rect);
 }
 
+/*
 void kc_map_view_walls(
-		kc_screen_t *kc_screen,
+		int win_w, int win_h,
+		SDL_Renderer *sdl_rend,
 		kc_map_t *kc_map,
 		kc_player_t *kc_player)
 {
@@ -71,33 +74,47 @@ void kc_map_view_walls(
 		}
 	}
 }
+*/
 
 void kc_map_view_player(
-		kc_screen_t *kc_screen,
+		SDL_Renderer *sdl_rend,
 		kc_map_t *kc_map,
 		kc_player_t *kc_player)
 {
-	for(int i = 0; i < 2; i++)
-	{
-		for(int j = 0; j < 2; j++)
-		{
-			kc_screen->pixels[
-					(kc_player->unit_x+j)+(kc_player->unit_y+i)*kc_screen->w
-					] = KC_PACK_COLOR(255, 255, 255);
+	SDL_Rect player_rect;
 
-		}
-	}
+	player_rect.x = kc_player->unit_x;
+	player_rect.y = kc_player->unit_y;
+	player_rect.h = 2;
+	player_rect.w = 2;
+
+	SDL_SetRenderDrawColor(sdl_rend, 255, 255, 255, 255);
+	SDL_RenderFillRect(sdl_rend, &player_rect);
 }
 
-void kc_intersect_draw(kc_screen_t *kc_screen, int x, int y, uint32_t color)
+void kc_intersect_draw(
+		int win_w, int win_h,
+		SDL_Renderer *sdl_rend,
+		int x, int y,
+		uint32_t color)
 {
-	if(x >= kc_screen->w || y >= kc_screen->h || x < 0 || y < 0)
+	SDL_Rect point;
+	uint8_t r, g, b;
+
+	point.x = x;
+	point.y = y;
+	point.h = 2;
+	point.w = 2;
+
+	r = (color >> 16) & 255;
+	g = (color >> 8) & 255;
+	b = color & 255;
+
+	/*
+	if(x >= win_w || y >= win_h || x < 0 || y < 0)
 		return;
-	for(int i = 0; i < 3; i++)
-	{
-		for(int j = 0; j < 3; j++)
-		{
-			kc_screen->pixels[(x+j)+(y+i)*kc_screen->w] = color;
-		}
-	}
+	*/
+
+	SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
+	SDL_RenderFillRect(sdl_rend, &point);
 }
