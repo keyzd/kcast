@@ -2,7 +2,7 @@
 #include <math.h>
 #include <SDL2/SDL.h>
 
-int kc_debug;
+int debug;
 
 /*
 ========================================================================
@@ -11,7 +11,7 @@ int kc_debug;
 */
 
 /* ARGB pixel format */
-#define KC_PACK_COLOR(R, G, B) ( ( 255<<24) |( R<<16 ) | ( G<<8 ) | B )
+#define PACK_COLOR(R, G, B) ( ( 255<<24) |( R<<16 ) | ( G<<8 ) | B )
 
 #define DEG2RAD(a) ( M_PI/180 * a )
 #define RAD2DEG(a) ( 180/M_PI * a )
@@ -23,118 +23,114 @@ int kc_debug;
 ========================================================================
 */
 
-struct kc_map_s
+typedef struct map_s
 {
 	/* TODO: invent map type and map format */
 	char *grid;
 	int block;
 	int grid_w, grid_h;
-};
-typedef struct kc_map_s kc_map_t;
+}map_t;
 
-struct kc_player_s
+typedef struct player_s
 {
-	int unit_x, unit_y;
+	int x, y;
 	/* Angles are in degrees*/
 	float view_angle;
 	float fov;
-};
-typedef struct kc_player_s kc_player_t;
+}player_t;
 
-struct kc_pair_s
+typedef struct pair_s
 {
 	char wall;
 	SDL_Texture *sdl_text;
-};
-typedef struct kc_pair_s kc_pair_t;
+}pair_t;
 
-struct kc_maptext_s
+typedef struct maptext_s
 {
-	kc_pair_t *data;
+	pair_t *data;
 	int count;
 	int limit;
-};
-typedef struct kc_maptext_s kc_maptext_t;
+}maptext_t;
 
 /*
 ========================================================================
-						MISCELLANEA
+						MISC.C DEFINITIONS
 ========================================================================
 */
 
 SDL_Texture* loadTexture(char *path, SDL_Renderer *sdl_rend);
 
-void kc_maptext_init(kc_maptext_t *mt);
-void kc_maptext_insert(kc_maptext_t *mt, char wall, SDL_Texture *sdl_text);
-SDL_Texture* kc_maptext_find(kc_maptext_t *mt, char wall);
+void maptext_init(maptext_t *mt);
+void maptext_insert(maptext_t *mt, char wall, SDL_Texture *sdl_text);
+SDL_Texture* maptext_find(maptext_t *mt, char wall);
 
 
 /*
 ========================================================================
-						KC_RENDERER DEFINITIONS
+						RENDERER.C DEFINITIONS
 ========================================================================
 */
 
 /* Main rendering function */
-void kc_3d_refresh(
-		kc_maptext_t *mt,
+void ThreeD_refresh(
+		maptext_t *mt,
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend,
-		kc_map_t *kc_map,
-		kc_player_t *kc_player);
+		map_t *map,
+		player_t *player);
 
 /* Draw floor and ceiling */
-void kc_clear_screen(
+void clear_screen(
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend, 
-		kc_map_t *kc_map);
+		map_t *map);
 
-void kc_wall_refresh(
-		kc_maptext_t *mt,
+void wall_refresh(
+		maptext_t *mt,
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend,
-		kc_map_t *kc_map,
-		kc_player_t *kc_player);
+		map_t *map,
+		player_t *player);
 
 /* Main raycasting function */
-int kc_raycast(
+int raycast(
 		int *wall_i,
 		int *side,
 		SDL_Renderer *sdl_rend,
-		kc_map_t* kc_map,
-		kc_player_t *kc_player,
+		map_t* map,
+		player_t *player,
 		uint32_t *column_col,
 		float angle);
 
-float kc_verticalgrid_intersection(
+float verticalgrid_intersection(
 		int *wall_i,
 		int *side,
 		SDL_Renderer *sdl_rend,
-		kc_map_t* kc_map,
-		kc_player_t *kc_player,
+		map_t* map,
+		player_t *player,
 		uint32_t *column_col,
 		float angle);
 
-float kc_horizontalgrid_intersection(
+float horizontalgrid_intersection(
 		int *wall_i,
 		int *side,
 		SDL_Renderer *sdl_rend,
-		kc_map_t* kc_map,
-		kc_player_t *kc_player,
+		map_t* map,
+		player_t *player,
 		uint32_t *column_col,
 		float angle);
 
-int kc_get_column_len(
-		kc_map_t *kc_map,
+int get_column_len(
+		map_t *map,
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend, 
-		kc_player_t *kc_player_t,
+		player_t *player_t,
 		float angle,
 		int ray_len,
 		uint32_t *column_col);
 
-void kc_draw_column(
-		kc_maptext_t *mt,
+void draw_column(
+		maptext_t *mt,
 		char wall,
 		int side,
 		int win_w, int win_h,
@@ -146,29 +142,29 @@ void kc_draw_column(
 
 /*
 ========================================================================
-						KC_DEBUG DEFINITIONS
+						DEBUG.C DEFINITIONS
 ========================================================================
 */
-void kc_map_view_update(
+void map_view_update(
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend,
-		kc_map_t *kc_map,
-		kc_player_t *kc_player);
+		map_t *map,
+		player_t *player);
 
 /*
-void kc_map_view_walls(
+void map_view_walls(
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend,
-		kc_map_t *kc_map,
-		kc_player_t *kc_player);
+		map_t *map,
+		player_t *player);
 */
 
-void kc_map_view_player(
+void map_view_player(
 		SDL_Renderer *sdl_rend,
-		kc_map_t *kc_map,
-		kc_player_t *kc_player);
+		map_t *map,
+		player_t *player);
 
-void kc_intersect_draw(
+void intersect_draw(
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend,
 		int x, int y,

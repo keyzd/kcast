@@ -9,23 +9,23 @@
 
 int main(int argc, char **argv)
 {
-	kc_debug = 1;
-	int kc_run;
-	kc_map_t kc_map;
+	debug = 1;
+	int run;
+	map_t map;
 	int win_w, win_h;
 	char *grid;
 	int fullscreen;
 
-	uint32_t oldtime, realtime, frames;
+	uint32_t realtime, frames;
 	float fps;
 	frames = 0;
 
-	kc_maptext_t maptext;
+	maptext_t maptext;
 
 	int map_view;
 	map_view = 0;
 
-	kc_player_t kc_player;
+	player_t player;
 
 	SDL_Window *sdl_win;
 	SDL_Renderer *sdl_rend;
@@ -76,16 +76,16 @@ int main(int argc, char **argv)
 	wall_brick2 = loadTexture("../brick2.png", sdl_rend);
 	wall_test = loadTexture("../wall.png", sdl_rend);
 
-	kc_maptext_init(&maptext);
-	kc_maptext_insert(&maptext, '1', wall_brick1);
-	kc_maptext_insert(&maptext, '2', wall_brick2);
-	kc_maptext_insert(&maptext, '3', wall_brick1);
-	kc_maptext_insert(&maptext, '4', wall_test);
+	maptext_init(&maptext);
+	maptext_insert(&maptext, '1', wall_brick1);
+	maptext_insert(&maptext, '2', wall_brick2);
+	maptext_insert(&maptext, '3', wall_brick1);
+	maptext_insert(&maptext, '4', wall_test);
 
-	kc_map.block = 32;
-	kc_map.grid_w = 16;
-	kc_map.grid_h = 16;
-	kc_map.grid = malloc(kc_map.grid_w * kc_map.grid_h * sizeof(char));
+	map.block = 32;
+	map.grid_w = 16;
+	map.grid_h = 16;
+	map.grid = malloc(map.grid_w * map.grid_h * sizeof(char));
 	grid = 
 		"4121111111111111"\
 		"4              2"\
@@ -132,15 +132,15 @@ int main(int argc, char **argv)
 		"21212121";
 		*/
 
-	strcpy(kc_map.grid, grid);
+	strcpy(map.grid, grid);
 
-	kc_player.unit_x = 2 * kc_map.block;
-	kc_player.unit_y = 2 * kc_map.block;
-	kc_player.fov = 60.0000;
-	kc_player.view_angle = 0.00;
+	player.x = 2 * map.block;
+	player.y = 2 * map.block;
+	player.fov = 60.0000;
+	player.view_angle = 0.00;
 
-	kc_run = 1;
-	while(kc_run)
+	run = 1;
+	while(run)
 	{
 		realtime = SDL_GetTicks();
 		fps = frames / (realtime / 1000.0);
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
 		{
 			if(sdl_event.type == SDL_QUIT)
 			{
-				kc_run = 0;
+				run = 0;
 			}
 			else if(sdl_event.type == SDL_KEYDOWN)
 			{
@@ -161,8 +161,8 @@ int main(int argc, char **argv)
 
 					/* Textures */
 					case SDLK_t:
-						if(kc_debug) kc_debug = 0;
-						else kc_debug = 1;
+						if(debug) debug = 0;
+						else debug = 1;
 						break;
 
 					/* Map view */
@@ -174,54 +174,54 @@ int main(int argc, char **argv)
 					/* PLAYER CONTROLS */
 
 					case SDLK_LEFT:
-						kc_player.view_angle += 3;
-						if(kc_player.view_angle > 360)
+						player.view_angle += 3;
+						if(player.view_angle > 360)
 						{
-							int tmp = kc_player.view_angle - 357;
-							kc_player.view_angle = -3 + tmp;
+							int tmp = player.view_angle - 357;
+							player.view_angle = -3 + tmp;
 						}
-						if(kc_player.view_angle == 360)
-							kc_player.view_angle = 0;
-						//printf("View angle: %f\n", kc_player.view_angle);
+						if(player.view_angle == 360)
+							player.view_angle = 0;
+						//printf("View angle: %f\n", player.view_angle);
 						break;
 
 					case SDLK_RIGHT:
-						kc_player.view_angle -= 3;
-						if(kc_player.view_angle < 0)
+						player.view_angle -= 3;
+						if(player.view_angle < 0)
 						{
-							kc_player.view_angle = 354 - kc_player.view_angle;
+							player.view_angle = 354 - player.view_angle;
 						}
-						if(kc_player.view_angle == 360)
-							kc_player.view_angle = 0;
-						//printf("View angle: %f\n", kc_player.view_angle);
+						if(player.view_angle == 360)
+							player.view_angle = 0;
+						//printf("View angle: %f\n", player.view_angle);
 						break;
 
 					case SDLK_w:
-						kc_player.unit_x +=
-							8*cos(DEG2RAD(kc_player.view_angle));
-						kc_player.unit_y -=
-							8*sin(DEG2RAD(kc_player.view_angle));
+						player.x +=
+							8*cos(DEG2RAD(player.view_angle));
+						player.y -=
+							8*sin(DEG2RAD(player.view_angle));
 						break;
 
 					case SDLK_s:
-						kc_player.unit_x -=
-							8*sin(M_PI_2 + DEG2RAD(kc_player.view_angle));
-						kc_player.unit_y -=
-							8*cos(M_PI_2 + DEG2RAD(kc_player.view_angle));
+						player.x -=
+							8*sin(M_PI_2 + DEG2RAD(player.view_angle));
+						player.y -=
+							8*cos(M_PI_2 + DEG2RAD(player.view_angle));
 						break;
 
 					case SDLK_a:
-						kc_player.unit_x -=
-							8*sin(DEG2RAD(kc_player.view_angle));
-						kc_player.unit_y -=
-							8*cos(DEG2RAD(kc_player.view_angle));
+						player.x -=
+							8*sin(DEG2RAD(player.view_angle));
+						player.y -=
+							8*cos(DEG2RAD(player.view_angle));
 						break;
 
 					case SDLK_d:
-						kc_player.unit_x +=
-							8*sin(DEG2RAD(kc_player.view_angle));
-						kc_player.unit_y +=
-							8*cos(DEG2RAD(kc_player.view_angle));
+						player.x +=
+							8*sin(DEG2RAD(player.view_angle));
+						player.y +=
+							8*cos(DEG2RAD(player.view_angle));
 						break;
 				}
 			}
@@ -235,12 +235,12 @@ int main(int argc, char **argv)
 		SDL_RenderClear(sdl_rend);
 		SDL_RenderCopy(sdl_rend, screen_sdl_text, NULL, NULL);
 		if(!map_view)
-			kc_3d_refresh(&maptext, win_w, win_h, sdl_rend, &kc_map, &kc_player);
-		else kc_map_view_update(win_w, win_h, sdl_rend, &kc_map, &kc_player);
+			ThreeD_refresh(&maptext, win_w, win_h, sdl_rend, &map, &player);
+		else map_view_update(win_w, win_h, sdl_rend, &map, &player);
 		SDL_RenderPresent(sdl_rend);
 
-		oldtime = realtime;
 
+		/* FPS lock */
 		SDL_Delay((1.0/60.0*1000));
 		frames++;
 	}
@@ -248,6 +248,6 @@ int main(int argc, char **argv)
 	SDL_DestroyTexture(screen_sdl_text);
 	SDL_DestroyRenderer(sdl_rend);
 	SDL_DestroyWindow(sdl_win);
-	free(kc_map.grid);
+	free(map.grid);
 	return 0;
 }

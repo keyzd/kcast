@@ -4,25 +4,25 @@
 
 #include "kcast.h"
 
-void kc_3d_refresh(
-		kc_maptext_t *mt,
+void ThreeD_refresh(
+		maptext_t *mt,
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend,
-		kc_map_t *kc_map,
-		kc_player_t *kc_player)
+		map_t *map,
+		player_t *player)
 {
-	kc_clear_screen(win_w, win_h, sdl_rend, kc_map);
-	kc_wall_refresh(mt, win_w, win_h, sdl_rend, kc_map, kc_player);
+	clear_screen(win_w, win_h, sdl_rend, map);
+	wall_refresh(mt, win_w, win_h, sdl_rend, map, player);
 }
 
-void kc_clear_screen(
+void clear_screen(
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend,
-		kc_map_t *kc_map)
+		map_t *map)
 {
+	/*
 	SDL_Rect screen_rect1, screen_rect2;
 
-	/*
 	screen_rect1.x = 0;
 	screen_rect1.y = 0;
 	screen_rect1.w = win_w;
@@ -40,20 +40,21 @@ void kc_clear_screen(
 	SDL_RenderFillRect(sdl_rend, &screen_rect2);
 	*/
 
-	screen_rect1.x = 0;
-	screen_rect1.y = 0;
-	screen_rect1.w = win_w;
-	screen_rect1.h = win_h;
+	SDL_Rect screen_rect;
+	screen_rect.x = 0;
+	screen_rect.y = 0;
+	screen_rect.w = win_w;
+	screen_rect.h = win_h;
 	SDL_SetRenderDrawColor(sdl_rend, 0, 0, 0, 255);
-	SDL_RenderFillRect(sdl_rend, &screen_rect1);
+	SDL_RenderFillRect(sdl_rend, &screen_rect);
 }
 
-void kc_wall_refresh(
-		kc_maptext_t *mt,
+void wall_refresh(
+		maptext_t *mt,
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend,
-		kc_map_t *kc_map,
-		kc_player_t *kc_player)
+		map_t *map,
+		player_t *player)
 {
 	float angle, angle_step, halffov;
 	int column_x;
@@ -62,28 +63,28 @@ void kc_wall_refresh(
 	int side;
 	int wall_i;
 
-	halffov = kc_player->fov / 2;
-	angle_step = kc_player->fov / win_w;
-	angle = kc_player->view_angle + halffov;
+	halffov = player->fov / 2;
+	angle_step = player->fov / win_w;
+	angle = player->view_angle + halffov;
 
 	for(column_x = 0; column_x < win_w; column_x++)
 	{
-		ray_len = kc_raycast(&wall_i, &side, sdl_rend, kc_map,
-						kc_player, &column_col, angle);
-		column_len = kc_get_column_len(kc_map, win_w, win_h,sdl_rend,
-						kc_player, angle, ray_len, &column_col);
-		kc_draw_column(mt, wall_i, side, win_w, win_h, sdl_rend,
+		ray_len = raycast(&wall_i, &side, sdl_rend, map,
+						player, &column_col, angle);
+		column_len = get_column_len(map, win_w, win_h,sdl_rend,
+						player, angle, ray_len, &column_col);
+		draw_column(mt, wall_i, side, win_w, win_h, sdl_rend,
 			column_len, column_col, column_x);
 		angle -= angle_step;
 	}
 }
 
-int kc_raycast(
+int raycast(
 		int *wall_i,
 		int *side,
 		SDL_Renderer *sdl_rend,
-		kc_map_t *kc_map,
-		kc_player_t *kc_player,
+		map_t *map,
+		player_t *player,
 		uint32_t *column_col,
 		float angle)
 {
@@ -92,17 +93,19 @@ int kc_raycast(
 	int wall_i_vert, wall_i_horiz;
 
 	float len_vert =
-		kc_verticalgrid_intersection(&wall_i_vert, &side_vert, sdl_rend,
-									 kc_map, kc_player, &color_vert, angle);
+		verticalgrid_intersection(&wall_i_vert, &side_vert, sdl_rend,
+									 map, player, &color_vert, angle);
 	float len_horiz =
-		kc_horizontalgrid_intersection(&wall_i_horiz, &side_horiz, sdl_rend,
-									   kc_map, kc_player, &color_horiz, angle);
+		horizontalgrid_intersection(&wall_i_horiz, &side_horiz, sdl_rend,
+									   map, player, &color_horiz, angle);
 
-	kc_intersect_draw(
+	/*
+	intersect_draw(
 		512, 512,
 		sdl_rend,
-		kc_player->unit_x, kc_player->unit_y,
-		KC_PACK_COLOR(255, 255, 255));
+		player->x, player->y,
+		PACK_COLOR(255, 255, 255));
+	*/
 
 	if(len_vert < len_horiz)
 	{
@@ -120,12 +123,12 @@ int kc_raycast(
 	}
 }
 
-float kc_horizontalgrid_intersection(
+float horizontalgrid_intersection(
 		int *wall_i,
 		int *side,
 		SDL_Renderer *sdl_rend,
-		kc_map_t *kc_map, 
-		kc_player_t *kc_player,
+		map_t *map, 
+		player_t *player,
 		uint32_t *column_col,
 		float angle)
 {
@@ -135,11 +138,6 @@ float kc_horizontalgrid_intersection(
 	int rayX, rayY;
 	float rayLen;
 	int hit;
-	int prevX, prevY;
-	int mapH, mapW;
-
-	mapH = kc_map->block * kc_map->grid_h;
-	mapW = kc_map->block * kc_map->grid_w;
 
 	/* There's no horizontal block sides */
 	if(abs((int)angle) == 180 || abs((int)angle) == 360 || abs((int)angle) == 0)
@@ -147,20 +145,20 @@ float kc_horizontalgrid_intersection(
 
 	/* Finding first horiz. intersection (point A) */
 	if(angle > 0 && angle < 180)
-		Ay = (kc_player->unit_y/kc_map->block)*kc_map->block-1;
+		Ay = (player->y/map->block)*map->block-1;
 	else
-		Ay = (kc_player->unit_y/kc_map->block)*kc_map->block+kc_map->block;
+		Ay = (player->y/map->block)*map->block+map->block;
 
-	Ax = kc_player->unit_x+(kc_player->unit_y-Ay)/tanf(DEG2RAD(angle));
+	Ax = player->x+(player->y-Ay)/tanf(DEG2RAD(angle));
 
 	/* Finding deltaX and deltaY */
-	deltaX = kc_map->block/tanf(DEG2RAD(angle));
+	deltaX = map->block/tanf(DEG2RAD(angle));
 	if(angle > 180 && angle < 270)
 		deltaX = 0 - deltaX;
 	if(angle > 270)
 		deltaX = abs(deltaX);
 
-	deltaY = kc_map->block;
+	deltaY = map->block;
 	if(angle > 0 && angle < 180)
 		deltaY = 0 - deltaY;
 
@@ -171,77 +169,79 @@ float kc_horizontalgrid_intersection(
 
 	while(!hit)
 	{
-		currentGridX = currentX / kc_map->block;
-		currentGridY = currentY / kc_map->block;
+		currentGridX = currentX / map->block;
+		currentGridY = currentY / map->block;
 
-		kc_intersect_draw(
+		/*
+		intersect_draw(
 			512, 512,
 			sdl_rend,
 			currentX, currentY,
-			KC_PACK_COLOR(0, 128, 0));
+			PACK_COLOR(0, 128, 0));
+		*/
 		
-		if(kc_map->grid[currentGridX+currentGridY*kc_map->grid_w] != ' ')
+		if(map->grid[currentGridX+currentGridY*map->grid_w] != ' ')
 		{ 
-			kc_intersect_draw(
+			/*
+			intersect_draw(
 				512, 512,
 				sdl_rend,
 				currentX, currentY,
-				KC_PACK_COLOR(0, 255, 0));
+				PACK_COLOR(0, 255, 0));
+			*/
 
 			hit = 1;
 		}
 		else
 		{
-			prevX = currentX;
-			prevY = currentY;
 			currentX += deltaX;
 			currentY += deltaY;
 		}
 
 	}
 
-	switch(kc_map->grid[currentGridX+currentGridY*kc_map->grid_w])
+	switch(map->grid[currentGridX+currentGridY*map->grid_w])
 	{
 		case '1':
-			*column_col = KC_PACK_COLOR(192, 0, 0);
+			*column_col = PACK_COLOR(192, 0, 0);
 			*wall_i = '1';
 			break;
 
 		case '2':
-			*column_col = KC_PACK_COLOR(0, 192, 0);
+			*column_col = PACK_COLOR(0, 192, 0);
 			*wall_i = '2';
 			break;
 
 		case '3':
-			*column_col = KC_PACK_COLOR(0, 0, 192);
+			*column_col = PACK_COLOR(0, 0, 192);
 			*wall_i = '3';
 			break;
 
 		case '4':
-			*column_col = KC_PACK_COLOR(192, 192, 192);
+			*column_col = PACK_COLOR(192, 192, 192);
 			*wall_i = '4';
 			break;
 
 		default:
-			*column_col = KC_PACK_COLOR(255, 255, 0);
+			*column_col = PACK_COLOR(255, 255, 0);
 			*wall_i = '1';
 			break;
 	}
 
-	rayX = abs(kc_player->unit_x - currentX);
-	rayY = abs(kc_player->unit_y - currentY);
+	rayX = abs(player->x - currentX);
+	rayY = abs(player->y - currentY);
 	rayLen = sqrt(rayX*rayX+rayY*rayY);
 
-	*side = abs(currentX % kc_map->block);
+	*side = abs(currentX % map->block);
 	return rayLen;
 }
 
-float kc_verticalgrid_intersection(
+float verticalgrid_intersection(
 		int *wall_i,
 		int *side,
 		SDL_Renderer *sdl_rend,
-		kc_map_t* kc_map,
-		kc_player_t *kc_player,
+		map_t* map,
+		player_t *player,
 		uint32_t *column_col,
 		float angle)
 {
@@ -251,11 +251,6 @@ float kc_verticalgrid_intersection(
 	int rayX, rayY;
 	float rayLen;
 	int hit;
-	int prevX, prevY;
-	int mapH, mapW;
-
-	mapH = kc_map->block * kc_map->grid_h;
-	mapW = kc_map->block * kc_map->grid_w;
 
 	/* There's no vertical block sides */
 	if(abs((int)angle) == 90 || abs((int)angle) == 270)
@@ -263,19 +258,19 @@ float kc_verticalgrid_intersection(
 
 	/* Finding first horiz. intersection (point B) */
 	if(angle < 90 || angle > 270)
-		Bx = (kc_player->unit_x/kc_map->block)*kc_map->block+kc_map->block;
+		Bx = (player->x/map->block)*map->block+map->block;
 	else
-		Bx = (kc_player->unit_x/kc_map->block)*kc_map->block-1;
+		Bx = (player->x/map->block)*map->block-1;
 
-	By = kc_player->unit_y+(kc_player->unit_x-Bx)*tanf(DEG2RAD(angle));
+	By = player->y+(player->x-Bx)*tanf(DEG2RAD(angle));
 
 	/* Finding deltaX and deltaY */
 	if(angle < 90 || angle > 270)
-		deltaX = kc_map->block;
+		deltaX = map->block;
 	else
-		deltaX = 0 - kc_map->block;
+		deltaX = 0 - map->block;
 
-	deltaY = fabsf(kc_map->block*tanf(DEG2RAD(angle)));
+	deltaY = fabsf(map->block*tanf(DEG2RAD(angle)));
 	if(angle > 0 && angle < 180)
 		deltaY = 0 - deltaY;
 
@@ -286,91 +281,93 @@ float kc_verticalgrid_intersection(
 
 	while(!hit)
 	{
-		currentGridX = currentX / kc_map->block;
-		currentGridY = currentY / kc_map->block;
+		currentGridX = currentX / map->block;
+		currentGridY = currentY / map->block;
 
-		kc_intersect_draw(
+		/*
+		intersect_draw(
 			512, 512,
 			sdl_rend,
 			currentX, currentY,
-			KC_PACK_COLOR(128, 0, 0));
+			PACK_COLOR(128, 0, 0));
+		*/
 
-		if(kc_map->grid[currentGridX+currentGridY*kc_map->grid_w] != ' ')
+		if(map->grid[currentGridX+currentGridY*map->grid_w] != ' ')
 		{
-			kc_intersect_draw(
+			/*
+			intersect_draw(
 				512, 512,
 				sdl_rend,
 				currentX, currentY,
-				KC_PACK_COLOR(255, 0, 0));
+				PACK_COLOR(255, 0, 0));
+			*/
 
 			hit = 1;
 		}
 		else
 		{
-			prevX = currentX;
-			prevY = currentY;
 			currentX += deltaX;
 			currentY += deltaY;
 		}
 
 	}
 
-	switch(kc_map->grid[currentGridX+currentGridY*kc_map->grid_w])
+	switch(map->grid[currentGridX+currentGridY*map->grid_w])
 	{
 		case '1':
-			*column_col = KC_PACK_COLOR(192, 0, 0);
+			*column_col = PACK_COLOR(192, 0, 0);
 			*wall_i = '1';
 			break;
 
 		case '2':
-			*column_col = KC_PACK_COLOR(0, 192, 0);
+			*column_col = PACK_COLOR(0, 192, 0);
 			*wall_i = '2';
 			break;
 
 		case '3':
-			*column_col = KC_PACK_COLOR(0, 0, 192);
+			*column_col = PACK_COLOR(0, 0, 192);
 			*wall_i = '3';
 			break;
 
 		case '4':
-			*column_col = KC_PACK_COLOR(192, 192, 192);
+			*column_col = PACK_COLOR(192, 192, 192);
 			*wall_i = '4';
 			break;
 
 		default:
-			*column_col = KC_PACK_COLOR(255, 255, 0);
+			*column_col = PACK_COLOR(255, 255, 0);
 			*wall_i = '1';
 			break;
 	}
 
-	rayX = abs(kc_player->unit_x - currentX);
-	rayY = abs(kc_player->unit_y - currentY);
+	rayX = abs(player->x - currentX);
+	rayY = abs(player->y - currentY);
 	rayLen = sqrt(rayX*rayX+rayY*rayY);
 
-	*side = abs(currentY % kc_map->block);
+	*side = abs(currentY % map->block);
 
 	return rayLen;
 }
 
-int kc_get_column_len(
-		kc_map_t *kc_map,
+int get_column_len(
+		map_t *map,
 		int win_w, int win_h,
 		SDL_Renderer *sdl_rend, 
-		kc_player_t *kc_player,
+		player_t *player,
 		float angle,
 		int ray_len,
 		uint32_t *column_col)
 {
 	float len;
-	ray_len *= cos(DEG2RAD((int)(angle)));
+	//ray_len *= cos(DEG2RAD((int)(angle)));
 	if(ray_len <= 0)
 		ray_len = 1;
-	len = kc_map->block * win_h / ray_len;
+	len = map->block * win_h / ray_len;
 	return (int)len;
 }
 
-void kc_draw_column(
-		kc_maptext_t *mt,
+void draw_column(
+		maptext_t *mt,
 		char wall,
 		int side,
 		int win_w, int win_h,
@@ -408,14 +405,14 @@ void kc_draw_column(
 	wall_rect_src.h = 64;
 	wall_rect_src.w = 1;
 	
-	if(kc_debug)
+	if(debug)
 	{
 		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
 		SDL_RenderDrawLine(sdl_rend, column_x, y_start, column_x, y_end);
 	}
 	else
 	{
-		wall_text = kc_maptext_find(mt, wall);
+		wall_text = maptext_find(mt, wall);
 		SDL_RenderCopy(sdl_rend, wall_text, &wall_rect_src, &wall_rect_dst);
 	}
 }

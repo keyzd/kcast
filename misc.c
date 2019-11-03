@@ -29,18 +29,18 @@ SDL_Texture* loadTexture(char* path, SDL_Renderer* sdl_rend)
     return newTexture;
 }
 
-void kc_maptext_init(kc_maptext_t *mt)
+void maptext_init(maptext_t *mt)
 {
 	mt->count = 0;
 	mt->limit = 8;
-	mt->data = malloc(mt->limit * sizeof(kc_pair_t));
+	mt->data = malloc(mt->limit * sizeof(pair_t));
 }
 
-void kc_maptext_insert(kc_maptext_t *mt, char wall, SDL_Texture *sdl_text)
+void maptext_insert(maptext_t *mt, char wall, SDL_Texture *sdl_text)
 {
 	if(mt->count == mt->limit)
 	{
-		kc_pair_t *new_data = malloc(mt->limit * 2 * sizeof(kc_pair_t));
+		pair_t *new_data = malloc(mt->limit * 2 * sizeof(pair_t));
 
 		for(int i = 0; i < mt->count; i++)
 		{
@@ -48,7 +48,7 @@ void kc_maptext_insert(kc_maptext_t *mt, char wall, SDL_Texture *sdl_text)
 		}
 
 		mt->limit *= 2;
-		mt->data = malloc(mt->limit * sizeof(kc_pair_t));
+		mt->data = malloc(mt->limit * sizeof(pair_t));
 
 		for(int i = 0; i < mt->count; i++)
 		{
@@ -56,7 +56,7 @@ void kc_maptext_insert(kc_maptext_t *mt, char wall, SDL_Texture *sdl_text)
 		}
 	}
 
-	kc_pair_t new_pair;
+	pair_t new_pair;
 	new_pair.wall = wall;
 	new_pair.sdl_text = sdl_text;
 
@@ -64,7 +64,7 @@ void kc_maptext_insert(kc_maptext_t *mt, char wall, SDL_Texture *sdl_text)
 	mt->count++;
 }
 
-SDL_Texture* kc_maptext_find(kc_maptext_t *mt, char wall)
+SDL_Texture* maptext_find(maptext_t *mt, char wall)
 {
 	for(int i = 0; i < mt->count; i++)
 	{
