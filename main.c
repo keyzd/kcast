@@ -7,28 +7,20 @@
 
 #include "kcast.h"
 
-int main(int argc, char **argv)
+#define FPS_LOCK 60
+
+int main(int argc, char *argv[])
 {
-	debug = 1;
-	int run;
-	map_t map;
-	int win_w, win_h;
+	debug = 0;
+	int isRun;
 	char *grid;
-	int fullscreen;
+	int isFullscreen;
 
-	uint32_t realtime, frames;
+	uint32_t realtime, frames_count;
 	float fps;
-	frames = 0;
-
-	maptext_t maptext;
-
-	int map_view;
-	map_view = 0;
-
-	player_t player;
+	frames_count = 0;
 
 	SDL_Window *sdl_win;
-	SDL_Renderer *sdl_rend;
 	SDL_Texture *screen_sdl_text;
 	SDL_Texture *wall_brick1, *wall_brick2, *wall_test;
 	SDL_Event sdl_event;
@@ -44,11 +36,11 @@ int main(int argc, char **argv)
 
 	win_w = atoi(argv[1]);
 	win_h = atoi(argv[2]);
-	fullscreen = atoi(argv[3]);
+	isFullscreen = atoi(argv[3]);
 
-	if(fullscreen)
-		fullscreen = SDL_WINDOW_FULLSCREEN_DESKTOP;
-	else fullscreen = 0;
+	if(isFullscreen)
+		isFullscreen = SDL_WINDOW_FULLSCREEN_DESKTOP;
+	else isFullscreen = 0;
 
 	SDL_Init(SDL_INIT_VIDEO);
 	IMG_Init(IMG_INIT_PNG);
@@ -60,7 +52,7 @@ int main(int argc, char **argv)
 		SDL_WINDOWPOS_UNDEFINED,
 		win_w,
 		win_h,
-		SDL_WINDOW_SHOWN | fullscreen
+		SDL_WINDOW_SHOWN | isFullscreen
 	);
 	sdl_rend = SDL_CreateRenderer(sdl_win, -1, SDL_RENDERER_ACCELERATED);
 	screen_sdl_text = SDL_CreateTexture
@@ -72,19 +64,21 @@ int main(int argc, char **argv)
 		win_h
 	);
 
-	wall_brick1 = loadTexture("../brick.png", sdl_rend);
-	wall_brick2 = loadTexture("../brick2.png", sdl_rend);
-	wall_test = loadTexture("../wall.png", sdl_rend);
+	wall_brick1 = load_texture("../brick.png");
+	wall_brick2 = load_texture("../brick2.png");
+	wall_test = load_texture("../wall.png");
 
-	maptext_init(&maptext);
-	maptext_insert(&maptext, '1', wall_brick1);
-	maptext_insert(&maptext, '2', wall_brick2);
-	maptext_insert(&maptext, '3', wall_brick1);
-	maptext_insert(&maptext, '4', wall_test);
+	maptext_init();
+	maptext_insert('1', wall_brick1);
+	maptext_insert('2', wall_brick2);
+	maptext_insert('3', wall_brick1);
+	maptext_insert('4', wall_test);
 
-	map.block = 32;
+	map.block = 64;
 	map.grid_w = 16;
 	map.grid_h = 16;
+	map.w = map.block * map.grid_w;
+	map.h = map.block * map.grid_h;
 	map.grid = malloc(map.grid_w * map.grid_h * sizeof(char));
 	grid = 
 		"4121111111111111"\
@@ -139,19 +133,19 @@ int main(int argc, char **argv)
 	player.fov = 60.0000;
 	player.view_angle = 0.00;
 
-	run = 1;
-	while(run)
+	isRun = 1;
+	while(isRun)
 	{
 		realtime = SDL_GetTicks();
-		fps = frames / (realtime / 1000.0);
+		fps = frames_count / (realtime / 1000.0);
 
-		printf("\rFPS: %.2f", fps);
+		//printf("\rFPS: %.2f", fps);
 
 		while(SDL_PollEvent(&sdl_event) != 0)
 		{
 			if(sdl_event.type == SDL_QUIT)
 			{
-				run = 0;
+				isRun = 0;
 			}
 			else if(sdl_event.type == SDL_KEYDOWN)
 			{
@@ -159,17 +153,16 @@ int main(int argc, char **argv)
 				{
 					/* DEBUG OPTIONS */
 
-					/* Textures */
+					/* Turn textures */
 					case SDLK_t:
 						if(debug) debug = 0;
 						else debug = 1;
 						break;
-
-					/* Map view */
-					case SDLK_m:
-						if(map_view) map_view = 0;
-						else map_view = 1;
+					
+					case SDLK_p:
+						printf("\nView angle: %f\n", player.view_angle);
 						break;
+
 
 					/* PLAYER CONTROLS */
 
@@ -182,7 +175,7 @@ int main(int argc, char **argv)
 						}
 						if(player.view_angle == 360)
 							player.view_angle = 0;
-						//printf("View angle: %f\n", player.view_angle);
+						printf("\nView angle: %f\n", player.view_angle);
 						break;
 
 					case SDLK_RIGHT:
@@ -193,7 +186,7 @@ int main(int argc, char **argv)
 						}
 						if(player.view_angle == 360)
 							player.view_angle = 0;
-						//printf("View angle: %f\n", player.view_angle);
+						printf("\nView angle: %f\n", player.view_angle);
 						break;
 
 					case SDLK_w:
@@ -234,15 +227,14 @@ int main(int argc, char **argv)
 
 		SDL_RenderClear(sdl_rend);
 		SDL_RenderCopy(sdl_rend, screen_sdl_text, NULL, NULL);
-		if(!map_view)
-			ThreeD_refresh(&maptext, win_w, win_h, sdl_rend, &map, &player);
-		else map_view_update(win_w, win_h, sdl_rend, &map, &player);
+
+		ThreeD_refresh();
+
 		SDL_RenderPresent(sdl_rend);
 
-
 		/* FPS lock */
-		SDL_Delay((1.0/60.0*1000));
-		frames++;
+		SDL_Delay((1.0/FPS_LOCK*1000));
+		frames_count++;
 	}
 
 	SDL_DestroyTexture(screen_sdl_text);

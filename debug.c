@@ -5,11 +5,7 @@
 
 #include "kcast.h"
 
-void map_view_update(
-		int win_w, int win_h,
-		SDL_Renderer *sdl_rend,
-		map_t *map,
-		player_t *player)
+void map_view_update()
 {
 	SDL_Rect screen_rect;
 
@@ -23,29 +19,25 @@ void map_view_update(
 }
 
 /*
-void map_view_walls(
-		int win_w, int win_h,
-		SDL_Renderer *sdl_rend,
-		map_t *map,
-		player_t *player)
+void map_view_walls()
 {
-	for(uint32_t i = 0; i < map->grid_w * map->grid_h; i++)
+	for(uint32_t i = 0; i < map.grid_w * map.grid_h; i++)
 	{
-		if(map->grid[i] != ' ')
+		if(map.grid[i] != ' ')
 		{
 			uint32_t level, first_reduced, first_origin, address;
 
-			level = i / map->grid_w;
-			first_reduced = level * map->grid_w;
-			first_origin = first_reduced * map->block * map->block;
+			level = i / map.grid_w;
+			first_reduced = level * map.grid_w;
+			first_origin = first_reduced * map.block * map.block;
 
-			address = first_origin + ( (i - first_reduced) * map->block );
+			address = first_origin + ( (i - first_reduced) * map.block );
 
-			for(uint32_t j = 0; j < map->block; j++)
+			for(uint32_t j = 0; j < map.block; j++)
 			{
-				for(uint32_t k = address; k < address+(map->block); k++)
+				for(uint32_t k = address; k < address+(map.block); k++)
 				{
-					switch(map->grid[i])
+					switch(map.grid[i])
 					{
 						case '1':
 							screen->pixels[k] =
@@ -76,15 +68,12 @@ void map_view_walls(
 }
 */
 
-void map_view_player(
-		SDL_Renderer *sdl_rend,
-		map_t *map,
-		player_t *player)
+void map_view_player()
 {
 	SDL_Rect player_rect;
 
-	player_rect.x = player->x;
-	player_rect.y = player->y;
+	player_rect.x = player.x;
+	player_rect.y = player.y;
 	player_rect.h = 2;
 	player_rect.w = 2;
 
@@ -92,11 +81,7 @@ void map_view_player(
 	SDL_RenderFillRect(sdl_rend, &player_rect);
 }
 
-void intersect_draw(
-		int win_w, int win_h,
-		SDL_Renderer *sdl_rend,
-		int x, int y,
-		uint32_t color)
+void intersect_draw(int x, int y, uint32_t color)
 {
 	SDL_Rect point;
 	uint8_t r, g, b;

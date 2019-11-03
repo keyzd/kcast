@@ -4,7 +4,7 @@
 
 #include "kcast.h"
 
-SDL_Texture* loadTexture(char* path, SDL_Renderer* sdl_rend)
+SDL_Texture* load_texture(char* path)
 {
     SDL_Texture* newTexture = NULL;
 
@@ -29,30 +29,30 @@ SDL_Texture* loadTexture(char* path, SDL_Renderer* sdl_rend)
     return newTexture;
 }
 
-void maptext_init(maptext_t *mt)
+void maptext_init()
 {
-	mt->count = 0;
-	mt->limit = 8;
-	mt->data = malloc(mt->limit * sizeof(pair_t));
+	maptext.count = 0;
+	maptext.limit = 8;
+	maptext.data = malloc(maptext.limit * sizeof(pair_t));
 }
 
-void maptext_insert(maptext_t *mt, char wall, SDL_Texture *sdl_text)
+void maptext_insert(char wall, SDL_Texture *sdl_text)
 {
-	if(mt->count == mt->limit)
+	if(maptext.count == maptext.limit)
 	{
-		pair_t *new_data = malloc(mt->limit * 2 * sizeof(pair_t));
+		pair_t *new_data = malloc(maptext.limit * 2 * sizeof(pair_t));
 
-		for(int i = 0; i < mt->count; i++)
+		for(int i = 0; i < maptext.count; i++)
 		{
-			new_data[i] = mt->data[i];
+			new_data[i] = maptext.data[i];
 		}
 
-		mt->limit *= 2;
-		mt->data = malloc(mt->limit * sizeof(pair_t));
+		maptext.limit *= 2;
+		maptext.data = malloc(maptext.limit * sizeof(pair_t));
 
-		for(int i = 0; i < mt->count; i++)
+		for(int i = 0; i < maptext.count; i++)
 		{
-			mt->data[i] = new_data[i];
+			maptext.data[i] = new_data[i];
 		}
 	}
 
@@ -60,16 +60,16 @@ void maptext_insert(maptext_t *mt, char wall, SDL_Texture *sdl_text)
 	new_pair.wall = wall;
 	new_pair.sdl_text = sdl_text;
 
-	mt->data[mt->count] = new_pair;
-	mt->count++;
+	maptext.data[maptext.count] = new_pair;
+	maptext.count++;
 }
 
-SDL_Texture* maptext_find(maptext_t *mt, char wall)
+SDL_Texture* maptext_find(char wall)
 {
-	for(int i = 0; i < mt->count; i++)
+	for(int i = 0; i < maptext.count; i++)
 	{
-		if(mt->data[i].wall == wall)
-			return mt->data[i].sdl_text;
+		if(maptext.data[i].wall == wall)
+			return maptext.data[i].sdl_text;
 	}
 
 	return NULL;
