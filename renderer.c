@@ -52,7 +52,7 @@ void wall_refresh()
 
 	halffov = player.fov / 2;
 	angle_step = player.fov / win_w;
-	angle = player.view_angle + halffov;
+	angle = (int)( player.view_angle + ( (int)halffov % 360 ) ) % 360;
 
 	for(column_x = 0; column_x < win_w; column_x++)
 	{
@@ -60,14 +60,12 @@ void wall_refresh()
 		column_len = get_column_len(angle, ray_len, &column_col);
 		draw_column(wall_i, side, column_len, column_col, column_x);
 		angle -= angle_step;
+		if(angle < 0)
+			angle = 360 - abs(angle);
 	}
 }
 
-int raycast(
-		int *wall_i,
-		int *side,
-		uint32_t *column_col,
-		float angle)
+int raycast(int *wall_i, int *side, uint32_t *column_col, float angle)
 {
 	uint32_t color_vert, color_horiz; 
 	int side_vert, side_horiz;
@@ -80,9 +78,7 @@ int raycast(
 		horizontalgrid_intersection(&wall_i_horiz, &side_horiz,
 									&color_horiz, angle);
 
-	/*
-	intersect_draw(512, 512, PACK_COLOR(255, 255, 255));
-	*/
+	//intersect_draw(player.x, player.y, PACK_COLOR(255, 255, 255));
 
 	if(len_vert < len_horiz)
 	{
@@ -147,16 +143,11 @@ float horizontalgrid_intersection(
 		currentGridX = currentX / map.block;
 		currentGridY = currentY / map.block;
 
-		/*
-		intersect_draw(512, 512, currentX, currentY, PACK_COLOR(0, 128, 0));
-		*/
+		//intersect_draw(currentX, currentY, PACK_COLOR(0, 128, 0));
 		
 		if(map.grid[currentGridX+currentGridY*map.grid_w] != ' ')
 		{ 
-			/*
-			intersect_draw(512, 512, currentX, currentY, PACK_COLOR(0, 255, 0));
-			*/
-
+			//intersect_draw(currentX, currentY, PACK_COLOR(0, 255, 0));
 			hit = 1;
 		}
 		else
@@ -250,16 +241,11 @@ float verticalgrid_intersection(
 		currentGridX = currentX / map.block;
 		currentGridY = currentY / map.block;
 
-		/*
-		intersect_draw(512, 512, currentX, currentY, PACK_COLOR(128, 0, 0));
-		*/
+		//intersect_draw(currentX, currentY, PACK_COLOR(128, 0, 0));
 
 		if(map.grid[currentGridX+currentGridY*map.grid_w] != ' ')
 		{
-			/*
-			intersect_draw(512, 512, currentX, currentY, PACK_COLOR(255, 0, 0));
-			*/
-
+			//intersect_draw(currentX, currentY, PACK_COLOR(255, 0, 0));
 			hit = 1;
 		}
 		else
@@ -312,10 +298,8 @@ int get_column_len(float angle, int ray_len, uint32_t *column_col)
 {
 	float len;
 	//ray_len *= cos(DEG2RAD((int)(angle)));
-	/*
 	if(ray_len <= 0)
-		ray_len = 1;
-	*/
+		return 0;
 	len = map.block * win_h / ray_len;
 	return (int)len;
 }

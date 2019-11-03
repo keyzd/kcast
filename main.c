@@ -133,6 +133,8 @@ int main(int argc, char *argv[])
 	player.fov = 60.0000;
 	player.view_angle = 0.00;
 
+	int a = player.view_angle;
+
 	isRun = 1;
 	while(isRun)
 	{
@@ -167,25 +169,16 @@ int main(int argc, char *argv[])
 					/* PLAYER CONTROLS */
 
 					case SDLK_LEFT:
-						player.view_angle += 3;
-						if(player.view_angle > 360)
-						{
-							int tmp = player.view_angle - 357;
-							player.view_angle = -3 + tmp;
-						}
-						if(player.view_angle == 360)
-							player.view_angle = 0;
+						a+=3;
+						player.view_angle = a % 360;
 						printf("\nView angle: %f\n", player.view_angle);
 						break;
 
 					case SDLK_RIGHT:
-						player.view_angle -= 3;
-						if(player.view_angle < 0)
-						{
-							player.view_angle = 354 - player.view_angle;
-						}
-						if(player.view_angle == 360)
-							player.view_angle = 0;
+						a-=3;
+						if(a < 0)
+							a = 360 - abs(a);
+						player.view_angle = a % 360;
 						printf("\nView angle: %f\n", player.view_angle);
 						break;
 
