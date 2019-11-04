@@ -191,6 +191,8 @@ float horizontalgrid_intersection(
 	rayY = abs(player.y - currentY);
 	rayLen = sqrt(rayX*rayX+rayY*rayY);
 
+	rayLen *= cos(DEG2RAD(fabsf(angle-player.view_angle)));
+
 	*side = abs(currentX % map.block);
 	return rayLen;
 }
@@ -288,6 +290,8 @@ float verticalgrid_intersection(
 	rayX = abs(player.x - currentX);
 	rayY = abs(player.y - currentY);
 	rayLen = sqrt(rayX*rayX+rayY*rayY);
+
+	rayLen *= cos(DEG2RAD(fabsf(angle-player.view_angle)));
 
 	*side = abs(currentY % map.block);
 
