@@ -23,6 +23,7 @@ typedef struct player_s
 	/* Angles are in degrees*/
 	float view_angle;
 	float fov;
+	int plane_dist;
 }player_t;
 
 typedef struct pair_s
@@ -38,6 +39,12 @@ typedef struct maptext_s
 	int limit;
 }maptext_t;
 
+typedef struct mat_s
+{
+	int w, h;
+	float *data;
+}mat_t;
+
 
 /*
 ========================================================================
@@ -51,6 +58,8 @@ maptext_t maptext;
 int debug;
 map_t map;
 player_t player;
+SDL_Surface *floor_text;
+uint32_t *floor_a;
 
 
 /*
@@ -71,7 +80,8 @@ player_t player;
 ========================================================================
 */
 
-SDL_Texture* load_texture(char *path);
+SDL_Surface* LoadBMP(const char* file);
+SDL_Texture* load_texture(char* path, SDL_Surface* (*loadFunc)(const char*));
 
 void maptext_init();
 void maptext_insert(char wall, SDL_Texture *sdl_text);
@@ -90,9 +100,9 @@ void ThreeD_refresh();
 /* Draw floor and ceiling */
 void clear_screen();
 
+/* Draw textured walls */
 void wall_refresh();
 
-/* Main raycasting function */
 int raycast(
 		int *wall_i,
 		int *side,
@@ -101,6 +111,7 @@ int raycast(
 		);
 
 float verticalgrid_intersection(
+		int *rayX, int *rayY,
 		int *wall_i,
 		int *side,
 		uint32_t *column_col,
@@ -108,6 +119,7 @@ float verticalgrid_intersection(
 		);
 
 float horizontalgrid_intersection(
+		int *rayX, int *rayY,
 		int *wall_i,
 		int *side,
 		uint32_t *column_col,
@@ -121,8 +133,13 @@ void draw_column(
 		int side,
 		int column_len,
 		uint32_t column_col,
-		int column_x
+		int column_x,
+		float angle,
+		int *column_y
 		);
+
+void draw_floor_column(int wall_x, int wall_y, int screen_x,
+						int screen_y, float angle);
 
 
 /*
@@ -140,3 +157,4 @@ void map_view_walls();
 void map_view_player();
 
 void intersect_draw(int x, int y, uint32_t color);
+

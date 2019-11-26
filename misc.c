@@ -1,14 +1,20 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_surface.h>
 
 #include "kcast.h"
 
-SDL_Texture* load_texture(char* path)
+SDL_Surface* LoadBMP(const char* file)
+{
+	return SDL_LoadBMP_RW(SDL_RWFromFile(file, "rb"), 1);
+}
+
+SDL_Texture* load_texture(char* path, SDL_Surface* (*loadFunc)(const char*))
 {
     SDL_Texture* newTexture = NULL;
 
-    SDL_Surface* loadedSurface = IMG_Load(path);
+    SDL_Surface* loadedSurface = (*loadFunc)(path);
     if( loadedSurface == NULL )
     {
         printf("Unable to load image %s! SDL_image Error: %s\n",

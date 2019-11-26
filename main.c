@@ -4,13 +4,15 @@
 #include <stdint.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_surface.h>
 
 #include "kcast.h"
 
-#define FPS_LOCK 60
+#define FPS_LOCK 120
 
 int main(int argc, char *argv[])
 {
+	//mat_test();
 	debug = 0;
 	int isRun;
 	char *grid;
@@ -22,7 +24,6 @@ int main(int argc, char *argv[])
 
 	SDL_Window *sdl_win;
 	SDL_Texture *screen_sdl_text;
-	SDL_Texture *wall_brick1, *wall_brick2, *wall_test;
 	SDL_Event sdl_event;
 
 	if(argc < 4)
@@ -64,74 +65,75 @@ int main(int argc, char *argv[])
 		win_h
 	);
 
-	wall_brick1 = load_texture("../brick.png");
-	wall_brick2 = load_texture("../brick2.png");
-	wall_test = load_texture("../wall.png");
+	SDL_Texture *gray_brick1 = load_texture("../wolfpack/WALL0.bmp", &LoadBMP);
+	SDL_Texture *gray_brick2 = load_texture("../wolfpack/WALL68.bmp", &LoadBMP);
+	SDL_Texture *blue_brick = load_texture("../wolfpack/WALL16.bmp", &LoadBMP);
+	SDL_Texture *red_brick = load_texture("../wolfpack/WALL32.bmp", &LoadBMP);
+	SDL_Texture *red_brick_eagle =
+		load_texture("../wolfpack/WALL38.bmp", &LoadBMP);
+	SDL_Texture *multicolor_brick =
+		load_texture("../wolfpack/WALL74.bmp", &LoadBMP);
+	
+	floor_text = IMG_Load("../square.png");
+	floor_text = SDL_ConvertSurfaceFormat(floor_text, SDL_PIXELFORMAT_ARGB8888, 0);
+	SDL_Texture *door_text = load_texture("../wolfpack/WALL98.bmp", &IMG_Load);
+	floor_a = malloc(floor_text->h * floor_text->pitch * sizeof(uint32_t));
+	//floor_a = (uint32_t*)floor_text->pixels;
+	memcpy(floor_a, (uint32_t*)floor_text->pixels,
+			floor_text->h * floor_text->pitch);
 
+	
 	maptext_init();
-	maptext_insert('1', wall_brick1);
-	maptext_insert('2', wall_brick2);
-	maptext_insert('3', wall_brick1);
-	maptext_insert('4', wall_test);
+	maptext_insert('1', gray_brick1);
+	maptext_insert('2', gray_brick2);
+	maptext_insert('3', blue_brick);
+	maptext_insert('4', red_brick);
+	maptext_insert('5', red_brick_eagle);
+	maptext_insert('6', multicolor_brick);
+	maptext_insert('7', door_text);
 
 	map.block = 64;
-	map.grid_w = 16;
-	map.grid_h = 16;
+	map.grid_w = 8;
+	map.grid_h = 8;
 	map.w = map.block * map.grid_w;
 	map.h = map.block * map.grid_h;
 	map.grid = malloc(map.grid_w * map.grid_h * sizeof(char));
 	grid = 
-		"4121111111111111"\
-		"4              2"\
-		"4     11111    2"\
-		"4    2         2"\
-		"4    2  33331112"\
-		"4    2         2"\
-		"4  221333      2"\
-		"4  3    24444  2"\
-		"4  3    2      2"\
-		"4  3    2  31432"\
-		"4  3    2      2"\
-		"4       2      2"\
-		"4 1111111      2"\
-		"4              2"\
-		"4              2"\
-		"3333333333333332";
+		" 222222 "\
+		"4      4"\
+		"4      4"\
+		"4      4"\
+		"4      4"\
+		"4      4"\
+		"4      4"\
+		" 222222 ";
 		/*
-		"4111111111111111"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"4              2"\
-		"3333333333333332";
-		*/
-		/*
-		"12121212"\
-		"2      1"\
-		"1      2"\
-		"2      1"\
-		"1      2"\
-		"2      1"\
-		"1      2"\
-		"21212121";
+		"1111111111111111"\
+		"1              1"\
+		"1     11111    1"\
+		"1    2         1"\
+		"d    d  33331111"\
+		"1    2         1"\
+		"1  345444      1"\
+		"1  3    44444  1"\
+		"1  d    4      1"\
+		"1  3    4  31431"\
+		"1  3    4      1"\
+		"1       4      1"\
+		"1 6663333      1"\
+		"1              1"\
+		"1              1"\
+		"1111111111111111";
 		*/
 
 	strcpy(map.grid, grid);
 
 	player.x = 2 * map.block;
 	player.y = 2 * map.block;
+	player.view_angle = 270.00;
+
 	player.fov = 60.0000;
-	player.view_angle = 0.00;
+	player.plane_dist = win_h/2 / tanf(DEG2RAD(player.fov/2));
 
 	int a = player.view_angle;
 
@@ -141,7 +143,7 @@ int main(int argc, char *argv[])
 		realtime = SDL_GetTicks();
 		fps = frames_count / (realtime / 1000.0);
 
-		//printf("\rFPS: %.2f", fps);
+		printf("\rFPS: %.2f", fps);
 
 		while(SDL_PollEvent(&sdl_event) != 0)
 		{
@@ -171,7 +173,7 @@ int main(int argc, char *argv[])
 					case SDLK_LEFT:
 						a+=3;
 						player.view_angle = a % 360;
-						printf("\nView angle: %f\n", player.view_angle);
+						//printf("\nView angle: %f\n", player.view_angle);
 						break;
 
 					case SDLK_RIGHT:
@@ -179,7 +181,7 @@ int main(int argc, char *argv[])
 						if(a < 0)
 							a = 360 - abs(a);
 						player.view_angle = a % 360;
-						printf("\nView angle: %f\n", player.view_angle);
+						//printf("\nView angle: %f\n", player.view_angle);
 						break;
 
 					case SDLK_w:
@@ -225,7 +227,7 @@ int main(int argc, char *argv[])
 
 		SDL_RenderPresent(sdl_rend);
 
-		/* FPS lock */
+		/* Set FPS Lock */
 		SDL_Delay((1.0/FPS_LOCK*1000));
 		frames_count++;
 	}

@@ -1,9 +1,9 @@
 CC = gcc
-CFLAGS = -g -Wall
+CFLAGS = -g
 LDFLAGS = -lSDL2 -lSDL2_image -lm
 
 PROGNAME = kcast
-SRCMODULES = main.c renderer.c debug.c misc.c
+SRCMODULES = main.c renderer.c debug.c misc.c math.c
 OBJMODULES = $(SRCMODULES:.c=.o)
 
 %.o: %.c %.h

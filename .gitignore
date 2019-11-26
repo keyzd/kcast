@@ -1,3 +1,5 @@
 *.o
 kcast
 log.txt
+tags
+
