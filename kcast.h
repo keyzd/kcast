@@ -23,7 +23,7 @@ typedef struct player_s
 	/* Angles are in degrees*/
 	float view_angle;
 	float fov;
-	int plane_dist;
+	float plane_dist;
 }player_t;
 
 typedef struct pair_s

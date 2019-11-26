@@ -12,7 +12,6 @@
 
 int main(int argc, char *argv[])
 {
-	//mat_test();
 	debug = 0;
 	int isRun;
 	char *grid;
@@ -74,7 +73,7 @@ int main(int argc, char *argv[])
 	SDL_Texture *multicolor_brick =
 		load_texture("../wolfpack/WALL74.bmp", &LoadBMP);
 	
-	floor_text = IMG_Load("../square.png");
+	floor_text = IMG_Load("../megatexture.png");
 	floor_text = SDL_ConvertSurfaceFormat(floor_text, SDL_PIXELFORMAT_ARGB8888, 0);
 	SDL_Texture *door_text = load_texture("../wolfpack/WALL98.bmp", &IMG_Load);
 	floor_a = malloc(floor_text->h * floor_text->pitch * sizeof(uint32_t));
@@ -132,8 +131,8 @@ int main(int argc, char *argv[])
 	player.y = 2 * map.block;
 	player.view_angle = 270.00;
 
-	player.fov = 60.0000;
-	player.plane_dist = win_h/2 / tanf(DEG2RAD(player.fov/2));
+	player.fov = 60.00;
+	player.plane_dist = (win_w/2) / tanf(DEG2RAD(player.fov/2));
 
 	int a = player.view_angle;
 

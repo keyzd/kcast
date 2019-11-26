@@ -486,14 +486,33 @@ uint32_t getpixel(SDL_Surface *surface, int x, int y)
 void draw_floor_column(int wall_x, int wall_y, int screen_x,
 						int screen_y, float angle)
 {
-	int text_x, text_y, ARayX, ARayY;
 	uint8_t r, g, b;
 	uint32_t color;
 
-	while(RayLen > 0)
+	int HB = win_h - wall_y;
+	float alpha, beta, epsilon;
+	int floorIntLen, floorIntX, floorIntY;
+	int textX, textY;
+	
+	alpha = M_PI_2-atanf(map.block/2/RayLen);
+	beta = M_PI_2-atanf(map.block/2/player.plane_dist);
+	epsilon = (alpha-beta)/HB;
+
+	while(screen_y-1 != win_h)
 	{
+		/* Find ray length of intersection with floor */
+		floorIntLen = tanf(alpha) * (map.block/2);
+
+		/* Find coords of intersection with floor */
+		floorIntX = cos(DEG2RAD(angle)) * floorIntLen;
+		floorIntY = sin(M_PI-DEG2RAD(angle)) * floorIntLen;
+
+		/* Find texture coords */
+		textX = abs(floorIntX % map.block);
+		textY = abs(floorIntY % map.block);
+
 		//color = floor_a[text_x+text_y*64];
-		color = getpixel(floor_text, text_x, text_y);
+		color = getpixel(floor_text, textX, textY);
 		r = (color >> 16) & 255;
 		g = (color >> 8) & 255;
 		b = color & 255;
@@ -502,6 +521,6 @@ void draw_floor_column(int wall_x, int wall_y, int screen_x,
 		SDL_RenderDrawPoint(sdl_rend, screen_x, screen_y);
 
 		screen_y++;
-		if(screen_y-1 == win_h) break;
+		alpha -= epsilon;
 	}
 }
