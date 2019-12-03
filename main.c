@@ -12,7 +12,7 @@
 
 int main(int argc, char *argv[])
 {
-	debug = 0;
+	turnTextures = 0;
 	int isRun;
 	char *grid;
 	int isFullscreen;
@@ -64,6 +64,12 @@ int main(int argc, char *argv[])
 		win_h
 	);
 
+/*
+========================================================================
+							PREPARING TEXTURES
+========================================================================
+*/
+	SDL_Texture *door_text = load_texture("../wolfpack/WALL98.bmp", &IMG_Load);
 	SDL_Texture *gray_brick1 = load_texture("../wolfpack/WALL0.bmp", &LoadBMP);
 	SDL_Texture *gray_brick2 = load_texture("../wolfpack/WALL68.bmp", &LoadBMP);
 	SDL_Texture *blue_brick = load_texture("../wolfpack/WALL16.bmp", &LoadBMP);
@@ -73,15 +79,11 @@ int main(int argc, char *argv[])
 	SDL_Texture *multicolor_brick =
 		load_texture("../wolfpack/WALL74.bmp", &LoadBMP);
 	
-	floor_text = IMG_Load("../megatexture.png");
+	floor_text = IMG_Load("../wolfpack/WALL0.bmp");
 	floor_text = SDL_ConvertSurfaceFormat(floor_text, SDL_PIXELFORMAT_ARGB8888, 0);
-	SDL_Texture *door_text = load_texture("../wolfpack/WALL98.bmp", &IMG_Load);
-	floor_a = malloc(floor_text->h * floor_text->pitch * sizeof(uint32_t));
-	//floor_a = (uint32_t*)floor_text->pixels;
-	memcpy(floor_a, (uint32_t*)floor_text->pixels,
-			floor_text->h * floor_text->pitch);
-
 	
+
+
 	maptext_init();
 	maptext_insert('1', gray_brick1);
 	maptext_insert('2', gray_brick2);
@@ -92,20 +94,28 @@ int main(int argc, char *argv[])
 	maptext_insert('7', door_text);
 
 	map.block = 64;
-	map.grid_w = 8;
-	map.grid_h = 8;
+	map.grid_w = 16;
+	map.grid_h = 16;
 	map.w = map.block * map.grid_w;
 	map.h = map.block * map.grid_h;
 	map.grid = malloc(map.grid_w * map.grid_h * sizeof(char));
 	grid = 
-		" 222222 "\
-		"4      4"\
-		"4      4"\
-		"4      4"\
-		"4      4"\
-		"4      4"\
-		"4      4"\
-		" 222222 ";
+		" 22222222222222 "\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		"4              4"\
+		" 22222222222222 ";
 		/*
 		"1111111111111111"\
 		"1              1"\
@@ -142,7 +152,7 @@ int main(int argc, char *argv[])
 		realtime = SDL_GetTicks();
 		fps = frames_count / (realtime / 1000.0);
 
-		printf("\rFPS: %.2f", fps);
+		//printf("\rFPS: %.2f", fps);
 
 		while(SDL_PollEvent(&sdl_event) != 0)
 		{
@@ -154,12 +164,10 @@ int main(int argc, char *argv[])
 			{
 				switch(sdl_event.key.keysym.sym)
 				{
-					/* DEBUG OPTIONS */
-
 					/* Turn textures */
 					case SDLK_t:
-						if(debug) debug = 0;
-						else debug = 1;
+						if(turnTextures) turnTextures = 0;
+						else turnTextures = 1;
 						break;
 					
 					case SDLK_p:

@@ -55,11 +55,10 @@ typedef struct mat_s
 int win_w, win_h;
 SDL_Renderer *sdl_rend;
 maptext_t maptext;
-int debug;
+int turnTextures;
 map_t map;
 player_t player;
 SDL_Surface *floor_text;
-uint32_t *floor_a;
 
 
 /*
@@ -138,6 +137,7 @@ void draw_column(
 		int *column_y
 		);
 
+uint32_t getpixel(SDL_Surface *surface, int x, int y);
 void draw_floor_column(int wall_x, int wall_y, int screen_x,
 						int screen_y, float angle);
 

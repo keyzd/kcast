@@ -9,6 +9,7 @@ int door = 0;
 int pointX;
 int pointY;
 int RayLen;
+int L;
 
 void ThreeD_refresh()
 {
@@ -393,7 +394,7 @@ float verticalgrid_intersection(
 int get_column_len(float angle, int ray_len, uint32_t *column_col)
 {
 	float len;
-	//if(ray_len <= 0) return 0;
+	if(ray_len <= 0) return 0;
 	//len = map.block * win_h / ray_len;
 	len = (float)map.block / ray_len * player.plane_dist;
 	return (int)len;
@@ -428,6 +429,7 @@ void draw_column(
 
 	y_start = y_up - column_len / 2;
 	y_end = y_down + column_len / 2;
+	L = win_w/2 - column_len/2;
 	*screen_y = y_end;
 
 	wall_rect_dst.h = column_len;
@@ -440,7 +442,7 @@ void draw_column(
 	wall_rect_src.h = map.block;
 	wall_rect_src.w = 1;
 	
-	if(debug)
+	if(turnTextures)
 	{
 		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
 		SDL_RenderDrawLine(sdl_rend, column_x, y_start, column_x, y_end);
@@ -449,6 +451,54 @@ void draw_column(
 	{
 		wall_text = maptext_find(wall);
 		SDL_RenderCopy(sdl_rend, wall_text, &wall_rect_src, &wall_rect_dst);
+	}
+}
+
+void draw_floor_column(int wall_x, int wall_y, int screen_x,
+						int screen_y, float angle)
+{
+	uint8_t r, g, b;
+	uint32_t color;
+
+	int HB = win_h - wall_y;
+	float alpha, beta, epsilon;
+	int floorIntLen, floorIntX, floorIntY;
+	int textX, textY;
+	
+	alpha = M_PI_2-atanf((float)map.block/2/RayLen);
+	beta = M_PI_2-atanf((float)map.block/2/player.plane_dist);
+	epsilon = (alpha-beta)/HB; /* ray step */
+
+	if((int)angle == (int)player.view_angle)
+	{
+		printf("%d %.2f %.2f\n", RayLen, RAD2DEG(alpha), RAD2DEG(beta));
+		printf("%d\n\n", L);
+	}
+
+	while(screen_y-1 != win_h)
+	{
+		/* Find ray length of Intersection with floor */
+		floorIntLen = tanf(alpha) * (map.block/2);
+		floorIntLen /= cos(DEG2RAD(fabsf(angle-player.view_angle)));
+
+		/* Find coords of intersection with floor */
+		floorIntX = /*player.x + */cos(M_PI_4-DEG2RAD(angle)) * floorIntLen;
+		floorIntY = /*player.y + */sin(M_PI_4-DEG2RAD(angle)) * floorIntLen;
+
+		/* Find texture coords */
+		textX = abs(floorIntX % map.block);
+		textY = abs(floorIntY % map.block);
+
+		color = getpixel(floor_text, textX, textY);
+		r = (color >> 16) & 255;
+		g = (color >> 8) & 255;
+		b = color & 255;
+
+		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
+		SDL_RenderDrawPoint(sdl_rend, screen_x, screen_y);
+
+		screen_y++;
+		alpha -= epsilon;
 	}
 }
 
@@ -481,46 +531,4 @@ uint32_t getpixel(SDL_Surface *surface, int x, int y)
     default:
         return 0; /* shouldn't happen, but avoids warnings */
     }
-}
-
-void draw_floor_column(int wall_x, int wall_y, int screen_x,
-						int screen_y, float angle)
-{
-	uint8_t r, g, b;
-	uint32_t color;
-
-	int HB = win_h - wall_y;
-	float alpha, beta, epsilon;
-	int floorIntLen, floorIntX, floorIntY;
-	int textX, textY;
-	
-	alpha = M_PI_2-atanf(map.block/2/RayLen);
-	beta = M_PI_2-atanf(map.block/2/player.plane_dist);
-	epsilon = (alpha-beta)/HB;
-
-	while(screen_y-1 != win_h)
-	{
-		/* Find ray length of intersection with floor */
-		floorIntLen = tanf(alpha) * (map.block/2);
-
-		/* Find coords of intersection with floor */
-		floorIntX = cos(DEG2RAD(angle)) * floorIntLen;
-		floorIntY = sin(M_PI-DEG2RAD(angle)) * floorIntLen;
-
-		/* Find texture coords */
-		textX = abs(floorIntX % map.block);
-		textY = abs(floorIntY % map.block);
-
-		//color = floor_a[text_x+text_y*64];
-		color = getpixel(floor_text, textX, textY);
-		r = (color >> 16) & 255;
-		g = (color >> 8) & 255;
-		b = color & 255;
-
-		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
-		SDL_RenderDrawPoint(sdl_rend, screen_x, screen_y);
-
-		screen_y++;
-		alpha -= epsilon;
-	}
 }
