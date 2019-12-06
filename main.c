@@ -8,7 +8,7 @@
 
 #include "kcast.h"
 
-#define FPS_LOCK 120
+#define FPS_LOCK 40
 
 int main(int argc, char *argv[])
 {
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 	char *grid;
 	int isFullscreen;
 
-	uint32_t realtime, frames_count;
+	u32 realtime, frames_count;
 	float fps;
 	frames_count = 0;
 
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	SDL_Texture *multicolor_brick =
 		load_texture("../wolfpack/WALL74.bmp", &LoadBMP);
 	
-	floor_text = IMG_Load("../wolfpack/WALL0.bmp");
+	floor_text = IMG_Load("../apple.png");
 	floor_text = SDL_ConvertSurfaceFormat(floor_text, SDL_PIXELFORMAT_ARGB8888, 0);
 	
 
@@ -94,28 +94,44 @@ int main(int argc, char *argv[])
 	maptext_insert('7', door_text);
 
 	map.block = 64;
-	map.grid_w = 16;
-	map.grid_h = 16;
+	map.grid_w = 32;
+	map.grid_h = 32;
 	map.w = map.block * map.grid_w;
 	map.h = map.block * map.grid_h;
 	map.grid = malloc(map.grid_w * map.grid_h * sizeof(char));
 	grid = 
-		" 22222222222222 "\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		"4              4"\
-		" 22222222222222 ";
+		" 222222222222222222222222222222 "\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		"4                              4"\
+		" 222222222222222222222222222222 ";
 		/*
 		"1111111111111111"\
 		"1              1"\

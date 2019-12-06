@@ -8,6 +8,10 @@
 ========================================================================
 */
 
+#define u32 uint32_t
+#define u16 uint16_t
+#define u8 uint8_t
+
 typedef struct map_s
 {
 	/* TODO: invent map type and map format */
@@ -105,7 +109,7 @@ void wall_refresh();
 int raycast(
 		int *wall_i,
 		int *side,
-		uint32_t *column_col,
+		u32 *column_col,
 		float angle
 		);
 
@@ -113,7 +117,7 @@ float verticalgrid_intersection(
 		int *rayX, int *rayY,
 		int *wall_i,
 		int *side,
-		uint32_t *column_col,
+		u32 *column_col,
 		float angle
 		);
 
@@ -121,23 +125,23 @@ float horizontalgrid_intersection(
 		int *rayX, int *rayY,
 		int *wall_i,
 		int *side,
-		uint32_t *column_col,
+		u32 *column_col,
 		float angle
 		);
 
-int get_column_len(float angle, int ray_len, uint32_t *column_col);
+int get_column_len(float angle, int ray_len, u32 *column_col);
 
 void draw_column(
 		char wall,
 		int side,
 		int column_len,
-		uint32_t column_col,
+		u32 column_col,
 		int column_x,
 		float angle,
 		int *column_y
 		);
 
-uint32_t getpixel(SDL_Surface *surface, int x, int y);
+u32 getpixel(SDL_Surface *surface, int x, int y);
 void draw_floor_column(int wall_x, int wall_y, int screen_x,
 						int screen_y, float angle);
 
@@ -156,5 +160,5 @@ void map_view_walls();
 
 void map_view_player();
 
-void intersect_draw(int x, int y, uint32_t color);
+void intersect_draw(int x, int y, u32 color);
 

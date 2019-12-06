@@ -54,7 +54,7 @@ void wall_refresh()
 	float angle, angle_step, halffov;
 	int column_x;
 	int ray_len, column_len;
-	uint32_t column_col;
+	u32 column_col;
 	int side;
 	int wall_i;
 	int column_y;
@@ -65,7 +65,7 @@ void wall_refresh()
 
 	for(column_x = 0; column_x < win_w; column_x++)
 	{
-		ray_len = raycast(&wall_i, &side, &column_col, (int)angle);
+		ray_len = raycast(&wall_i, &side, &column_col, angle);
 		column_len = get_column_len(angle, ray_len, &column_col);
 		draw_column(wall_i, side, column_len, column_col, column_x, angle,
 			&column_y);
@@ -78,9 +78,9 @@ void wall_refresh()
 	}
 }
 
-int raycast(int *wall_i, int *side, uint32_t *column_col, float angle)
+int raycast(int *wall_i, int *side, u32 *column_col, float angle)
 {
-	uint32_t color_vert, color_horiz; 
+	u32 color_vert, color_horiz; 
 	int side_vert, side_horiz;
 	int wall_i_vert, wall_i_horiz;
 	int vertX, vertY, horizX, horizY;
@@ -118,7 +118,7 @@ float horizontalgrid_intersection(
 		int *rayX, int *rayY,
 		int *wall_i,
 		int *side,
-		uint32_t *column_col,
+		u32 *column_col,
 		float angle
 		)
 {
@@ -256,7 +256,7 @@ float verticalgrid_intersection(
 		int *rayX, int *rayY,
 		int *wall_i,
 		int *side,
-		uint32_t *column_col,
+		u32 *column_col,
 		float angle
 		)
 {
@@ -391,7 +391,7 @@ float verticalgrid_intersection(
 	return rayLen;
 }
 
-int get_column_len(float angle, int ray_len, uint32_t *column_col)
+int get_column_len(float angle, int ray_len, u32 *column_col)
 {
 	float len;
 	if(ray_len <= 0) return 0;
@@ -404,13 +404,13 @@ void draw_column(
 		char wall,
 		int side,
 		int column_len,
-		uint32_t column_col,
+		u32 column_col,
 		int column_x,
 		float angle,
 		int *screen_y)
 {
 	int y_up, y_down;
-	uint8_t r, g, b;
+	u8 r, g, b;
 	int y_start, y_end;
 	SDL_Rect wall_rect_dst, wall_rect_src;
 	SDL_Texture *wall_text;
@@ -457,17 +457,19 @@ void draw_column(
 void draw_floor_column(int wall_x, int wall_y, int screen_x,
 						int screen_y, float angle)
 {
-	uint8_t r, g, b;
-	uint32_t color;
+	u8 r, g, b;
+	u32 color;
 
-	int HB = win_h - wall_y;
 	float alpha, beta, epsilon;
 	int floorIntLen, floorIntX, floorIntY;
 	int textX, textY;
+	int ph = map.block/2; /* player's height */
+	int LF = L;
+	int HB = LF/3;
 	
-	alpha = M_PI_2-atanf((float)map.block/2/RayLen);
-	beta = M_PI_2-atanf((float)map.block/2/player.plane_dist);
-	epsilon = (alpha-beta)/HB; /* ray step */
+	alpha = atanf((float)RayLen/ph);
+	beta = atanf((float)player.plane_dist/ph);
+	epsilon = fabsf(alpha-beta)/HB; /* ray step */
 
 	if((int)angle == (int)player.view_angle)
 	{
@@ -475,15 +477,16 @@ void draw_floor_column(int wall_x, int wall_y, int screen_x,
 		printf("%d\n\n", L);
 	}
 
+	floorIntLen = RayLen;
+
 	while(screen_y-1 != win_h)
 	{
 		/* Find ray length of Intersection with floor */
-		floorIntLen = tanf(alpha) * (map.block/2);
 		floorIntLen /= cos(DEG2RAD(fabsf(angle-player.view_angle)));
 
 		/* Find coords of intersection with floor */
-		floorIntX = /*player.x + */cos(M_PI_4-DEG2RAD(angle)) * floorIntLen;
-		floorIntY = /*player.y + */sin(M_PI_4-DEG2RAD(angle)) * floorIntLen;
+		floorIntX = player.y - cos(M_PI_2-DEG2RAD(angle)) * floorIntLen;
+		floorIntY = player.x + sin(M_PI_2-DEG2RAD(angle)) * floorIntLen;
 
 		/* Find texture coords */
 		textX = abs(floorIntX % map.block);
@@ -494,19 +497,22 @@ void draw_floor_column(int wall_x, int wall_y, int screen_x,
 		g = (color >> 8) & 255;
 		b = color & 255;
 
+		//screen_y += win_h/2 - screen_y;
+
 		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
 		SDL_RenderDrawPoint(sdl_rend, screen_x, screen_y);
 
 		screen_y++;
 		alpha -= epsilon;
+		floorIntLen = tanf(alpha) * (ph);
 	}
 }
 
-uint32_t getpixel(SDL_Surface *surface, int x, int y)
+u32 getpixel(SDL_Surface *surface, int x, int y)
 {
     int bpp = surface->format->BytesPerPixel;
     /* Here p is the address to the pixel we want to retrieve */
-    Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+    u8 *p = (u8 *)surface->pixels + y * surface->pitch + x * bpp;
 
     switch(bpp) {
     case 1:
@@ -514,7 +520,7 @@ uint32_t getpixel(SDL_Surface *surface, int x, int y)
         break;
 
     case 2:
-        return *(Uint16 *)p;
+        return *(u16 *)p;
         break;
 
     case 3:
@@ -525,7 +531,7 @@ uint32_t getpixel(SDL_Surface *surface, int x, int y)
         break;
 
     case 4:
-        return *(Uint32 *)p;
+        return *(u32 *)p;
         break;
 
     default:
