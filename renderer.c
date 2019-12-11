@@ -368,10 +368,10 @@ void draw_floor_column(int screen_x, int screen_y, float angle)
 	int ph = map.block/2; /* player's height */
 	int HB = L/8;
 	
-	//alpha = atanf((float)(RayLen/ph));
+	alpha = atanf((float)(RayLen/ph));
 
-	//alpha = RAD2DEG(alpha);
-	alpha = 89.0;
+	alpha = RAD2DEG(alpha);
+	//alpha = 89.0;
 	beta = atanf((float)(player.plane_dist/ph));
 	beta = RAD2DEG(beta);
 
@@ -387,11 +387,11 @@ void draw_floor_column(int screen_x, int screen_y, float angle)
 		//printf("%d a: %f b: %f a-b: %f\n", RayLen, alpha, beta, fabsf(alpha-beta));
 	}
 
-	floorIntLen = 1;
+	floorIntLen = RayLen;
 
 	SDL_Surface *pixels = NULL;
 
-	for(int y = win_h-1; y > screen_y; y--)
+	for(; screen_y < win_h-1; screen_y++)
 	{
 		/* Find ray length of Intersection with floor */
 		floorIntLen /= cos(DEG2RAD((angle-player.view_angle)));
@@ -416,12 +416,12 @@ void draw_floor_column(int screen_x, int screen_y, float angle)
 			b = color & 255;
 
 			SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
-			SDL_RenderDrawPoint(sdl_rend, screen_x, y);
-			SDL_RenderDrawPoint(sdl_rend, screen_x, win_h-y);
+			SDL_RenderDrawPoint(sdl_rend, screen_x, screen_y);
+			SDL_RenderDrawPoint(sdl_rend, screen_x, win_h-screen_y);
 		}
 
-		beta += epsilon;
-		floorIntLen = tanf(DEG2RAD(beta)) * ph;
+		alpha -= epsilon;
+		floorIntLen = tanf(DEG2RAD(alpha)) * ph;
 	}
 }
 
