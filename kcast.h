@@ -21,6 +21,12 @@ typedef struct map_s
 	int w, h;
 }map_t;
 
+typedef struct sprite_s
+{
+	int x, y;
+	int text_id;
+}sprite_t;
+
 typedef struct player_s
 {
 	int x, y;
@@ -43,12 +49,6 @@ typedef struct maptext_s
 	int limit;
 }maptext_t;
 
-typedef struct mat_s
-{
-	int w, h;
-	float *data;
-}mat_t;
-
 
 /*
 ========================================================================
@@ -58,6 +58,8 @@ typedef struct mat_s
 
 int win_w, win_h;
 SDL_Renderer *sdl_rend;
+SDL_Window *sdl_win;
+SDL_Texture *screen_sdl_text;
 maptext_t maptext;
 int turnTextures;
 map_t map;
@@ -89,6 +91,7 @@ SDL_Texture* load_texture(char* path, SDL_Surface* (*loadFunc)(const char*));
 void maptext_init();
 void maptext_insert(char wall, SDL_Texture *sdl_text);
 SDL_Texture* maptext_find(char wall);
+u32 getpixel(SDL_Surface *surface, int x, int y);
 
 
 /*
@@ -129,7 +132,9 @@ float horizontalgrid_intersection(
 		float angle
 		);
 
-int get_column_len(float angle, int ray_len, u32 *column_col);
+void set_wall_index(char wall, int *wall_i, u32 *column_col);
+
+int get_column_len(int ray_len);
 
 void draw_column(
 		char wall,
@@ -137,13 +142,12 @@ void draw_column(
 		int column_len,
 		u32 column_col,
 		int column_x,
-		float angle,
 		int *column_y
 		);
 
-u32 getpixel(SDL_Surface *surface, int x, int y);
-void draw_floor_column(int wall_x, int wall_y, int screen_x,
-						int screen_y, float angle);
+void draw_floor_column(int screen_x, int screen_y, float angle);
+
+void draw_sprite();
 
 
 /*

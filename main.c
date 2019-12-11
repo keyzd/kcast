@@ -8,7 +8,7 @@
 
 #include "kcast.h"
 
-#define FPS_LOCK 40
+#define FPS_LOCK 60
 
 int main(int argc, char *argv[])
 {
@@ -21,8 +21,6 @@ int main(int argc, char *argv[])
 	float fps;
 	frames_count = 0;
 
-	SDL_Window *sdl_win;
-	SDL_Texture *screen_sdl_text;
 	SDL_Event sdl_event;
 
 	if(argc < 4)
@@ -69,7 +67,7 @@ int main(int argc, char *argv[])
 							PREPARING TEXTURES
 ========================================================================
 */
-	SDL_Texture *door_text = load_texture("../wolfpack/WALL98.bmp", &IMG_Load);
+	SDL_Texture *default_wall = load_texture("../debug_text.png", &IMG_Load);
 	SDL_Texture *gray_brick1 = load_texture("../wolfpack/WALL0.bmp", &LoadBMP);
 	SDL_Texture *gray_brick2 = load_texture("../wolfpack/WALL68.bmp", &LoadBMP);
 	SDL_Texture *blue_brick = load_texture("../wolfpack/WALL16.bmp", &LoadBMP);
@@ -79,81 +77,78 @@ int main(int argc, char *argv[])
 	SDL_Texture *multicolor_brick =
 		load_texture("../wolfpack/WALL74.bmp", &LoadBMP);
 	
-	floor_text = IMG_Load("../apple.png");
+	//floor_text = IMG_Load("../wolfpack/WALL22.bmp");
+	floor_text = IMG_Load("../square.png");
 	floor_text = SDL_ConvertSurfaceFormat(floor_text, SDL_PIXELFORMAT_ARGB8888, 0);
 	
 
 
 	maptext_init();
+	maptext_insert('0', default_wall);
 	maptext_insert('1', gray_brick1);
 	maptext_insert('2', gray_brick2);
 	maptext_insert('3', blue_brick);
 	maptext_insert('4', red_brick);
 	maptext_insert('5', red_brick_eagle);
 	maptext_insert('6', multicolor_brick);
-	maptext_insert('7', door_text);
 
 	map.block = 64;
 	map.grid_w = 32;
-	map.grid_h = 32;
+	map.grid_h = 26;
 	map.w = map.block * map.grid_w;
 	map.h = map.block * map.grid_h;
 	map.grid = malloc(map.grid_w * map.grid_h * sizeof(char));
 	grid = 
-		" 222222222222222222222222222222 "\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		"4                              4"\
-		" 222222222222222222222222222222 ";
-		/*
-		"1111111111111111"\
-		"1              1"\
-		"1     11111    1"\
-		"1    2         1"\
-		"d    d  33331111"\
-		"1    2         1"\
-		"1  345444      1"\
-		"1  3    44444  1"\
-		"1  d    4      1"\
-		"1  3    4  31431"\
-		"1  3    4      1"\
-		"1       4      1"\
-		"1 6663333      1"\
-		"1              1"\
-		"1              1"\
-		"1111111111111111";
-		*/
+	/*
+		"111111111111111111"\
+		"1                1"\
+		"1                1"\
+		"1       55555    1"\
+		"1      6         1"\
+		"1      6         1"\
+		"1      6         1"\
+		"1    44444       1"\
+		"1    3   233333  1"\
+		"1    3   2       1"\
+		"1    3   2 11111 1"\
+		"1        2       1"\
+		"1        2   4   1"\
+		"1  6666662   4   1"\
+		"1            4   1"\
+		"1                1"\
+		"1                1"\
+		"111111111111111111";
+	*/
+	"11111111111111111111111111111111"\
+	"2                              2"\
+	"2                              2"\
+	"2  s                           2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"2                              2"\
+	"33333333333333333333333333333332";
 
 	strcpy(map.grid, grid);
 
-	player.x = 2 * map.block;
+	player.x = 3 * map.block;
 	player.y = 2 * map.block;
 	player.view_angle = 270.00;
 
