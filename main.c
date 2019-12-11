@@ -94,19 +94,18 @@ int main(int argc, char *argv[])
 
 	map.block = 64;
 
+	/*
 	map.grid_w = 32;
 	map.grid_h = 26;
+	*/
 
-	/*
 	map.grid_w = 18;
 	map.grid_h = 18;
-	*/
 
 	map.w = map.block * map.grid_w;
 	map.h = map.block * map.grid_h;
 	map.grid = malloc(map.grid_w * map.grid_h * sizeof(char));
 	grid = 
-	/*
 		"111111111111111111"\
 		"1                1"\
 		"1                1"\
@@ -125,7 +124,7 @@ int main(int argc, char *argv[])
 		"1                1"\
 		"1                1"\
 		"111111111111111111";
-	*/
+	/*
 	"11111111111111111111111111111111"\
 	"2                              2"\
 	"2                              2"\
@@ -152,6 +151,7 @@ int main(int argc, char *argv[])
 	"2                              2"\
 	"2                              2"\
 	"33333333333333333333333333333332";
+	*/
 
 	strcpy(map.grid, grid);
 
