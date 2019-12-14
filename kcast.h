@@ -21,6 +21,7 @@ typedef struct map_s
 	int w, h;
 }map_t;
 
+/* */
 typedef struct sprite_s
 {
 	int x, y;
@@ -56,6 +57,7 @@ typedef struct maptext_s
 ========================================================================
 */
 
+int fisheye;
 int win_w, win_h;
 SDL_Renderer *sdl_rend;
 SDL_Window *sdl_win;
@@ -65,6 +67,7 @@ int turnTextures;
 map_t map;
 player_t player;
 SDL_Surface *floor_text;
+SDL_Surface *ceil_text;
 
 
 /*
@@ -101,13 +104,13 @@ u32 getpixel(SDL_Surface *surface, int x, int y);
 */
 
 /* Main rendering function */
-void ThreeD_refresh();
+void threeD_refresh();
 
 /* Draw floor and ceiling */
 void clear_screen();
 
 /* Draw textured walls */
-void wall_refresh();
+void draw_columns();
 
 int raycast(
 		int *wall_i,
@@ -116,7 +119,7 @@ int raycast(
 		float angle
 		);
 
-float verticalgrid_intersection(
+float march_by_vertical_grid(
 		int *rayX, int *rayY,
 		int *wall_i,
 		int *side,
@@ -124,7 +127,7 @@ float verticalgrid_intersection(
 		float angle
 		);
 
-float horizontalgrid_intersection(
+float march_by_horizontal_grid(
 		int *rayX, int *rayY,
 		int *wall_i,
 		int *side,
@@ -136,7 +139,7 @@ void set_wall_index(char wall, int *wall_i, u32 *column_col);
 
 int get_column_len(int ray_len);
 
-void draw_column(
+void draw_wall_column(
 		char wall,
 		int side,
 		int column_len,
@@ -145,24 +148,9 @@ void draw_column(
 		int *column_y
 		);
 
-void draw_floor_column(int screen_x, int screen_y, float angle);
+void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle);
 
+/* TODO:
 void draw_sprite();
-
-
-/*
-========================================================================
-						DEBUG.C DEFINITIONS
-========================================================================
 */
-void map_view_update();
-
-/* TODO */
-/*
-void map_view_walls();
-*/
-
-void map_view_player();
-
-void intersect_draw(int x, int y, u32 color);
 

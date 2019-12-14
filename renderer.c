@@ -8,10 +8,10 @@
 int RayLen;
 int L;
 
-void ThreeD_refresh()
+void threeD_refresh()
 {
 	clear_screen();
-	wall_refresh();
+	draw_columns();
 }
 
 void clear_screen()
@@ -28,16 +28,16 @@ void clear_screen()
 	screen_rect2.w = win_w;
 	screen_rect2.h = win_h/2;
 
-	//SDL_SetRenderDrawColor(sdl_rend, 56, 56, 56, 255);
-	SDL_SetRenderDrawColor(sdl_rend, 0, 0, 0, 255);
+	SDL_SetRenderDrawColor(sdl_rend, 56, 56, 56, 255);
+	//SDL_SetRenderDrawColor(sdl_rend, 0, 0, 0, 255);
 	SDL_RenderFillRect(sdl_rend, &screen_rect1);
 
-	//SDL_SetRenderDrawColor(sdl_rend, 113, 113, 113, 255);
-	SDL_SetRenderDrawColor(sdl_rend, 0, 0, 0, 255);
+	SDL_SetRenderDrawColor(sdl_rend, 113, 113, 113, 255);
+	//SDL_SetRenderDrawColor(sdl_rend, 0, 0, 0, 255);
 	SDL_RenderFillRect(sdl_rend, &screen_rect2);
 }
 
-void wall_refresh()
+void draw_columns()
 {
 	float angle, angle_step, halffov;
 	int column_x;
@@ -55,11 +55,10 @@ void wall_refresh()
 	{
 		ray_len = raycast(&wall_i, &side, &column_col, angle);
 		column_len = get_column_len(ray_len);
-		draw_column(wall_i, side, column_len, column_col, column_x, &column_y);
+		draw_wall_column(wall_i, side, column_len, column_col, column_x, &column_y);
 
 		RayLen = ray_len;
-		draw_floor_column(column_x, column_y, angle);
-		//draw_floor_column(column_x, win_h/2, angle);
+		draw_floor_ceiling_columns(column_x, column_y, angle);
 
 		angle -= angle_step;
 		if(angle < 0)
@@ -74,30 +73,30 @@ int raycast(int *wall_i, int *side, u32 *column_col, float angle)
 	int wall_i_vert, wall_i_horiz;
 	int vertX, vertY, horizX, horizY;
 
-	float len_vert =
-		verticalgrid_intersection(&vertX, &vertY, &wall_i_vert, &side_vert,
+	float vertical_intersection_len =
+		march_by_vertical_grid(&vertX, &vertY, &wall_i_vert, &side_vert,
 									&color_vert, angle);
-	float len_horiz =
-		horizontalgrid_intersection(&horizX, &horizY, &wall_i_horiz,
+	float horizontal_intersection_len =
+		march_by_horizontal_grid(&horizX, &horizY, &wall_i_horiz,
 									&side_horiz, &color_horiz, angle);
 
-	if(len_vert < len_horiz)
+	if(vertical_intersection_len < horizontal_intersection_len)
 	{
 		*column_col = color_vert;
 		*side = side_vert;
 		*wall_i = wall_i_vert;
-		return (int)len_vert;
+		return (int)vertical_intersection_len;
 	}
 	else
 	{
 		*column_col = color_horiz;
 		*side = side_horiz;
 		*wall_i = wall_i_horiz;
-		return (int)len_horiz;
+		return (int)horizontal_intersection_len;
 	}
 }
 
-float horizontalgrid_intersection(
+float march_by_horizontal_grid(
 		int *rayX, int *rayY,
 		int *wall_i,
 		int *side,
@@ -144,7 +143,7 @@ float horizontalgrid_intersection(
 	{
 		currentGridX = currentX / map.block;
 		currentGridY = currentY / map.block;
-		
+
 		char wall_char = map.grid[currentGridX+currentGridY*map.grid_w];
 		if(wall_char != ' ') 
 		{ 
@@ -168,12 +167,13 @@ float horizontalgrid_intersection(
 	rayLen = sqrt((*rayX)*(*rayX)+(*rayY)*(*rayY));
 
 	/* Fixing fisheye distortion */
-	rayLen *= cos(DEG2RAD(fabsf(angle-player.view_angle)));
+	if(!fisheye)
+		rayLen *= cos(DEG2RAD(fabsf(angle-player.view_angle)));
 
 	return rayLen;
 }
 
-float verticalgrid_intersection(
+float march_by_vertical_grid(
 		int *rayX, int *rayY,
 		int *wall_i,
 		int *side,
@@ -242,7 +242,8 @@ float verticalgrid_intersection(
 	rayLen = sqrt((*rayX)*(*rayX)+(*rayY)*(*rayY));
 
 	/* Fixing fisheye distortion */
-	rayLen *= cos(DEG2RAD(fabsf(angle-player.view_angle)));
+	if(!fisheye)
+		rayLen *= cos(DEG2RAD(fabsf(angle-player.view_angle)));
 
 	return rayLen;
 }
@@ -296,12 +297,12 @@ int get_column_len(int ray_len)
 {
 	float len;
 	if(ray_len <= 0) return 1;
-	len = map.block * win_h / ray_len;
+	len = (float)map.block * win_h / ray_len;
 	//len = (float)map.block / ray_len * player.plane_dist;
 	return (int)len;
 }
 
-void draw_column(
+void draw_wall_column(
 		char wall,
 		int side,
 		int column_len,
@@ -328,7 +329,7 @@ void draw_column(
 	y_start = y_up - column_len / 2;
 	y_end = y_down + column_len / 2;
 	//L = win_w/2 - column_len/2;
-	L = win_w/2;
+	L = win_h/2;
 	*screen_y = y_end-1;
 
 	wall_rect_dst.h = column_len;
@@ -353,7 +354,7 @@ void draw_column(
 	}
 }
 
-void draw_floor_column(int screen_x, int screen_y, float angle)
+void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle)
 {
 	/*
 	if(RayLen <= player.plane_dist)
@@ -365,18 +366,17 @@ void draw_floor_column(int screen_x, int screen_y, float angle)
 	float alpha, beta, epsilon;
 	int floorIntLen, floorIntX, floorIntY;
 	int textX, textY;
-	int ph = map.block/2; /* player's height */
-	int HB = L;
-	
-	alpha = atanf((float)(RayLen/ph));
+	float ph = (float)map.block/2; /* player's height */
+	float HB = L;
 
+	alpha = atanf((float)RayLen/ph);
+	beta = atanf((float)player.plane_dist/(win_w/2));
+	
 	alpha = RAD2DEG(alpha);
-	//alpha = 89.0;
-	beta = atanf((float)(player.plane_dist/ph));
 	beta = RAD2DEG(beta);
 
 	//epsilon = fabsf(alpha-beta)/HB; /* ray step */
-	epsilon = fabsf(89.0-beta)/HB;
+	epsilon = (90.0-beta)/HB;
 
 	if((int)angle == (int)player.view_angle)
 	{
@@ -385,6 +385,7 @@ void draw_floor_column(int screen_x, int screen_y, float angle)
 		printf("%d\n\n", L);
 		*/
 		//printf("%d a: %f b: %f a-b: %f\n", RayLen, alpha, beta, fabsf(alpha-beta));
+		//printf("%f %f\n", alpha, beta);
 	}
 
 	floorIntLen = 1;
@@ -394,34 +395,32 @@ void draw_floor_column(int screen_x, int screen_y, float angle)
 	for(int y = win_h-1 ; y > screen_y; y--)
 	{
 		/* Find ray length of Intersection with floor */
-		floorIntLen /= cos(DEG2RAD((angle-player.view_angle)));
+		if(!fisheye)
+			floorIntLen /= cos(DEG2RAD((angle-player.view_angle)));
 
 		/* Find coords of intersection with floor */
 		floorIntY = player.y - cos(M_PI_2-DEG2RAD(angle)) * floorIntLen;
 		floorIntX = player.x + sin(M_PI_2-DEG2RAD(angle)) * floorIntLen;
 
 		/* Find texture coords */
-		textX = abs(floorIntX/3 % map.block);
-		textY = abs(floorIntY/3 % map.block);
+		textX = abs(floorIntX % map.block);
+		textY = abs(floorIntY % map.block);
 
 		color = getpixel(floor_text, textX, textY);
+		r = (color >> 16) & 255;
+		g = (color >> 8) & 255;
+		b = color & 255;
+		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
+		SDL_RenderDrawPoint(sdl_rend, screen_x, y);
 
-		pixels = SDL_GetWindowSurface(sdl_win);
-		u32 pix_color = getpixel(pixels, screen_x, y);
-
-		if(pix_color != (u32)PACK_COLOR(0, 0, 0))
-		{
-			r = (color >> 16) & 255;
-			g = (color >> 8) & 255;
-			b = color & 255;
-
-			SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
-			SDL_RenderDrawPoint(sdl_rend, screen_x, y);
-			SDL_RenderDrawPoint(sdl_rend, screen_x, win_h-y);
-		}
+		color = getpixel(ceil_text, textX, textY);
+		r = (color >> 16) & 255;
+		g = (color >> 8) & 255;
+		b = color & 255;
+		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
+		SDL_RenderDrawPoint(sdl_rend, screen_x, win_h-y);
 
 		beta += epsilon;
 		floorIntLen = tanf(DEG2RAD(beta)) * ph;
 	}
 }
-

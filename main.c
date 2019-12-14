@@ -8,10 +8,11 @@
 
 #include "kcast.h"
 
-#define FPS_LOCK 60
+#define FPS_LOCK 60.0
 
 int main(int argc, char *argv[])
 {
+	fisheye = 0;
 	turnTextures = 0;
 	int isRun;
 	char *grid;
@@ -77,9 +78,13 @@ int main(int argc, char *argv[])
 	SDL_Texture *multicolor_brick =
 		load_texture("../wolfpack/WALL74.bmp", &LoadBMP);
 	
-	//floor_text = IMG_Load("../wolfpack/WALL22.bmp");
-	floor_text = IMG_Load("../square.png");
+	floor_text = IMG_Load("../wolfpack/WALL52.bmp");
+	//floor_text = IMG_Load("../square.png");
 	floor_text = SDL_ConvertSurfaceFormat(floor_text, SDL_PIXELFORMAT_ARGB8888, 0);
+
+	ceil_text = IMG_Load("../wolfpack/WALL22.bmp");
+	//ceil_text = IMG_Load("../square2.png");
+	ceil_text = SDL_ConvertSurfaceFormat(ceil_text, SDL_PIXELFORMAT_ARGB8888, 0);
 	
 
 
@@ -124,6 +129,17 @@ int main(int argc, char *argv[])
 		"1                1"\
 		"1                1"\
 		"111111111111111111";
+		/*
+		"1111111111111111"\
+		"1    1   1     1"\
+		"1              1"\
+		"1    1   1     1"\
+		"111111   1111111"\
+		"1              1"\
+		"1              1"\
+		"1              1"\
+		"1111111111111111";
+		*/
 	/*
 	"11111111111111111111111111111111"\
 	"2                              2"\
@@ -155,7 +171,7 @@ int main(int argc, char *argv[])
 
 	strcpy(map.grid, grid);
 
-	player.x = 3 * map.block;
+	player.x = 2 * map.block;
 	player.y = 2 * map.block;
 	player.view_angle = 270.00;
 
@@ -190,6 +206,11 @@ int main(int argc, char *argv[])
 					
 					case SDLK_p:
 						printf("\nView angle: %f\n", player.view_angle);
+						break;
+
+					case SDLK_f:
+						if(fisheye) fisheye = 0;
+						else fisheye = 1;
 						break;
 
 
@@ -248,12 +269,12 @@ int main(int argc, char *argv[])
 		SDL_RenderClear(sdl_rend);
 		SDL_RenderCopy(sdl_rend, screen_sdl_text, NULL, NULL);
 
-		ThreeD_refresh();
+		threeD_refresh();
 
 		SDL_RenderPresent(sdl_rend);
 
 		/* Set FPS Lock */
-		SDL_Delay((1.0/FPS_LOCK*1000));
+		SDL_Delay(1.0/FPS_LOCK*1000);
 		frames_count++;
 	}
 

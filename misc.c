@@ -87,27 +87,28 @@ u32 getpixel(SDL_Surface *surface, int x, int y)
     /* Here p is the address to the pixel we want to retrieve */
     u8 *p = (u8 *)surface->pixels + y * surface->pitch + x * bpp;
 
-    switch(bpp) {
-    case 1:
-        return *p;
-        break;
+    switch(bpp)
+	{
+		case 1:
+			return *p;
+			break;
 
-    case 2:
-        return *(u16 *)p;
-        break;
+		case 2:
+			return *(u16 *)p;
+			break;
 
-    case 3:
-        if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
-            return p[0] << 16 | p[1] << 8 | p[2];
-        else
-            return p[0] | p[1] << 8 | p[2] << 16;
-        break;
+		case 3:
+			if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+				return p[0] << 16 | p[1] << 8 | p[2];
+			else
+				return p[0] | p[1] << 8 | p[2] << 16;
+			break;
 
-    case 4:
-        return *(u32 *)p;
-        break;
+		case 4:
+			return *(u32 *)p;
+			break;
 
-    default:
-        return 0; /* shouldn't happen, but avoids warnings */
+		default:
+			return 0; /* shouldn't happen, but avoids warnings */
     }
 }
