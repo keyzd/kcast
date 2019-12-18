@@ -12,7 +12,8 @@
 
 int main(int argc, char *argv[])
 {
-	fisheye = 0;
+	fisheye_on = 0;
+	lowpoly_on = 0;
 	turnTextures = 0;
 	int isRun;
 	char *grid;
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
 
 	map.w = map.block * map.grid_w;
 	map.h = map.block * map.grid_h;
-	map.grid = malloc(map.grid_w * map.grid_h * sizeof(char));
+	map.grid = malloc((map.grid_w * map.grid_h + 1) * sizeof(char));
 	grid = 
 		"111111111111111111"\
 		"1                1"\
@@ -126,10 +127,10 @@ int main(int argc, char *argv[])
 		"1        2   4   1"\
 		"1  6666662   4   1"\
 		"1            4   1"\
-		"1                1"\
+		"1           1    1"\
 		"1                1"\
 		"111111111111111111";
-		/*
+	/*
 		"1111111111111111"\
 		"1    1   1     1"\
 		"1              1"\
@@ -139,8 +140,6 @@ int main(int argc, char *argv[])
 		"1              1"\
 		"1              1"\
 		"1111111111111111";
-		*/
-	/*
 	"11111111111111111111111111111111"\
 	"2                              2"\
 	"2                              2"\
@@ -177,6 +176,8 @@ int main(int argc, char *argv[])
 
 	player.fov = 60.00;
 	player.plane_dist = (win_w/2) / tanf(DEG2RAD(player.fov/2));
+	player.beta = RAD2DEG(atanf((float)player.plane_dist/(win_w/2)));
+	player.ph = (float)map.block/2; /* player's height */
 
 	int a = player.view_angle;
 
@@ -186,7 +187,7 @@ int main(int argc, char *argv[])
 		realtime = SDL_GetTicks();
 		fps = frames_count / (realtime / 1000.0);
 
-		//printf("\rFPS: %.2f", fps);
+		//printf("FPS: %.2f\n", fps);
 
 		while(SDL_PollEvent(&sdl_event) != 0)
 		{
@@ -209,8 +210,13 @@ int main(int argc, char *argv[])
 						break;
 
 					case SDLK_f:
-						if(fisheye) fisheye = 0;
-						else fisheye = 1;
+						if(fisheye_on) fisheye_on = 0;
+						else fisheye_on = 1;
+						break;
+
+					case SDLK_l:
+						if(lowpoly_on) lowpoly_on = 0;
+						else lowpoly_on = 1;
 						break;
 
 

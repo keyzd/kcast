@@ -35,6 +35,8 @@ typedef struct player_s
 	float view_angle;
 	float fov;
 	float plane_dist;
+	float beta;
+	float ph;
 }player_t;
 
 typedef struct pair_s
@@ -57,7 +59,8 @@ typedef struct maptext_s
 ========================================================================
 */
 
-int fisheye;
+int fisheye_on;
+int lowpoly_on;
 int win_w, win_h;
 SDL_Renderer *sdl_rend;
 SDL_Window *sdl_win;
@@ -149,8 +152,4 @@ void draw_wall_column(
 		);
 
 void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle);
-
-/* TODO:
-void draw_sprite();
-*/
 
