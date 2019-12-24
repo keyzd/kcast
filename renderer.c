@@ -302,7 +302,6 @@ int get_column_len(int ray_len)
 	float len;
 	if(ray_len <= 0) return 1;
 	len = (float)map.block * win_h / ray_len;
-	//len = (float)map.block / ray_len * player.plane_dist;
 	return (int)len;
 }
 
@@ -371,16 +370,13 @@ void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle)
 
 	for(int y = win_h-1 ; y > screen_y; y--)
 	{
-		/* Find ray length of Intersection with floor */
 		floorPointDist = tanf(DEG2RAD(beta)) * player.ph;
 		if(!fisheye_on)
 			floorPointDist /= cos(DEG2RAD((angle-player.view_angle)));
 
-		/* Find coords of intersection with floor */
 		floorPointY = player.y - cos(M_PI_2-DEG2RAD(angle)) * floorPointDist;
 		floorPointX = player.x + sin(M_PI_2-DEG2RAD(angle)) * floorPointDist;
 
-		/* Find texture coords */
 		textureX = abs(floorPointX % map.block);
 		textureY = abs(floorPointY % map.block);
 
