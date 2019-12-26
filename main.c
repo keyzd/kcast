@@ -14,10 +14,11 @@ int main(int argc, char *argv[])
 {
 	fisheye_on = 0;
 	lowpoly_on = 0;
-	turnTextures = 0;
-	int isRun;
-	char *grid;
-	int isFullscreen;
+	wallTextures_on = 1;
+	planesTextures_on = 1;
+
+	int run;
+	int fullscreen;
 
 	u32 realtime, frames_count;
 	float fps;
@@ -36,23 +37,24 @@ int main(int argc, char *argv[])
 
 	win_w = atoi(argv[1]);
 	win_h = atoi(argv[2]);
-	isFullscreen = atoi(argv[3]);
+	fullscreen = atoi(argv[3]);
 
-	if(isFullscreen)
-		isFullscreen = SDL_WINDOW_FULLSCREEN_DESKTOP;
-	else isFullscreen = 0;
+	if(fullscreen)
+		fullscreen = SDL_WINDOW_FULLSCREEN;
+	else fullscreen = 0;
 
 	SDL_Init(SDL_INIT_VIDEO);
 	IMG_Init(IMG_INIT_PNG);
+	SDL_ShowCursor(SDL_DISABLE);
 
 	sdl_win = SDL_CreateWindow
 	(
 		"KCast",
-		SDL_WINDOWPOS_UNDEFINED,
-		SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_CENTERED_MASK,
+		SDL_WINDOWPOS_CENTERED_MASK,
 		win_w,
 		win_h,
-		SDL_WINDOW_SHOWN | isFullscreen
+		fullscreen
 	);
 	sdl_rend = SDL_CreateRenderer(sdl_win, -1, SDL_RENDERER_ACCELERATED);
 	screen_sdl_text = SDL_CreateTexture
@@ -69,42 +71,52 @@ int main(int argc, char *argv[])
 							PREPARING TEXTURES
 ========================================================================
 */
+	SDL_Texture *default_wall = load_texture("textures/debug_text.png", &IMG_Load);
+
 	/*
-	SDL_Texture *default_wall = load_texture("../debug_text.png", &IMG_Load);
-	SDL_Texture *gray_brick1 = load_texture("../wolfpack/WALL0.bmp", &LoadBMP);
-	SDL_Texture *gray_brick2 = load_texture("../wolfpack/WALL68.bmp", &LoadBMP);
-	SDL_Texture *blue_brick = load_texture("../wolfpack/WALL16.bmp", &LoadBMP);
-	SDL_Texture *red_brick = load_texture("../wolfpack/WALL32.bmp", &LoadBMP);
+	SDL_Texture *gray_brick1 = load_texture("textures/wolfpack/WALL0.bmp", &LoadBMP);
+	SDL_Texture *gray_brick2 = load_texture("textures/wolfpack/WALL68.bmp", &LoadBMP);
+	SDL_Texture *blue_brick = load_texture("textures/wolfpack/WALL16.bmp", &LoadBMP);
+	SDL_Texture *red_brick = load_texture("textures/wolfpack/WALL32.bmp", &LoadBMP);
 	SDL_Texture *red_brick_eagle =
-		load_texture("../wolfpack/WALL38.bmp", &LoadBMP);
+		load_texture("textures/wolfpack/WALL38.bmp", &LoadBMP);
 	SDL_Texture *multicolor_brick =
-		load_texture("../wolfpack/WALL74.bmp", &LoadBMP);
+		load_texture("textures/wolfpack/WALL74.bmp", &LoadBMP);
 	*/
 
-	SDL_Texture *wall_light = load_texture("/home/keyzd/Downloads/textures/wall_light.png", &IMG_Load);
-	SDL_Texture *comp1 = load_texture("/home/keyzd/Downloads/textures/comp1.png", &IMG_Load);
-	SDL_Texture *comp2 = load_texture("/home/keyzd/Downloads/textures/comp2.png", &IMG_Load);
-	SDL_Texture *danger_wall = load_texture("/home/keyzd/Downloads/textures/danger_wall.png", &IMG_Load);
-	SDL_Texture *box = load_texture("/home/keyzd/Downloads/textures/q2_strogg_box.png", &IMG_Load);
-	SDL_Texture *hellsign = load_texture("/home/keyzd/Downloads/textures/666.png", &IMG_Load);
-	SDL_Texture *steel_wall = load_texture("/home/keyzd/Downloads/textures/steel_wall.png", &IMG_Load);
-	SDL_Texture *steel_wall2 = load_texture("/home/keyzd/Downloads/textures/steel_wall2.png", &IMG_Load);
-	SDL_Texture *normal_wall = load_texture("/home/keyzd/Downloads/textures/normal_wall.png", &IMG_Load);
+	SDL_Texture *wall_light =
+		load_texture("textures/doompack/wall_light.png", &IMG_Load);
+	SDL_Texture *comp1 =
+		load_texture("textures/doompack/comp1.png", &IMG_Load);
+	SDL_Texture *comp2 =
+		load_texture("textures/doompack/comp2.png", &IMG_Load);
+	SDL_Texture *danger_wall =
+		load_texture("textures/doompack/danger_wall.png", &IMG_Load);
+	SDL_Texture *box =
+		load_texture("textures/doompack/q2_strogg_box.png", &IMG_Load);
+	SDL_Texture *hellsign =
+		load_texture("textures/doompack/666.png", &IMG_Load);
+	SDL_Texture *steel_wall =
+		load_texture("textures/doompack/steel_wall.png", &IMG_Load);
+	SDL_Texture *normal_wall =
+		load_texture("textures/doompack/normal_wall.png", &IMG_Load);
 	
-	//floor_text = IMG_Load("../wolfpack/WALL52.bmp");
-	//floor_text = IMG_Load("../square2.png");
-	floor_text = IMG_Load("/home/keyzd/Downloads/textures/floor.png");
-	floor_text = SDL_ConvertSurfaceFormat(floor_text, SDL_PIXELFORMAT_ARGB8888, 0);
+	//floor_text = IMG_Load("textures/wolfpack/WALL52.bmp");
+	//floor_text = IMG_Load("textures/square2.png");
+	floor_text =
+		IMG_Load("textures/doompack/floor.png");
+	floor_text =
+		SDL_ConvertSurfaceFormat(floor_text, SDL_PIXELFORMAT_ARGB8888, 0);
 
-	//ceil_text = IMG_Load("../wolfpack/WALL22.bmp");
-	//ceil_text = IMG_Load("../square.png");
-	ceil_text = IMG_Load("/home/keyzd/Downloads/textures/ceiling_lights2.png");
-	ceil_text = SDL_ConvertSurfaceFormat(ceil_text, SDL_PIXELFORMAT_ARGB8888, 0);
-	
-
+	//ceil_text = IMG_Load("textures/wolfpack/WALL22.bmp");
+	//ceil_text = IMG_Load("textures/square.png");
+	ceil_text =
+		IMG_Load("textures/doompack/ceiling_lights2.png");
+	ceil_text =
+		SDL_ConvertSurfaceFormat(ceil_text, SDL_PIXELFORMAT_ARGB8888, 0);
 
 	maptext_init();
-	maptext_insert('0', wall_light);
+	maptext_insert('0', default_wall);
 	maptext_insert('1', comp1);
 	maptext_insert('2', comp2);
 	maptext_insert('3', danger_wall);
@@ -113,38 +125,11 @@ int main(int argc, char *argv[])
 	maptext_insert('6', hellsign);
 	maptext_insert('7', steel_wall);
 
-	map.block = 64;
-	map.grid_w = 18;
-	map.grid_h = 18;
-
-	map.w = map.block * map.grid_w;
-	map.h = map.block * map.grid_h;
-	map.grid = malloc((map.grid_w * map.grid_h + 1) * sizeof(char));
-	grid = 
-		"111111111111111111"\
-		"5                1"\
-		"5                1"\
-		"5   4   55555    1"\
-		"6      6         1"\
-		"5      0         1"\
-		"5      6         1"\
-		"5    34444       1"\
-		"1    3   233333  1"\
-		"1    3   2       1"\
-		"1    3   2 11111 1"\
-		"1        2       1"\
-		"1        2   7   1"\
-		"1  7777652   7   1"\
-		"1            7   1"\
-		"1                1"\
-		"1                1"\
-		"111111111111111111";
-
-	strcpy(map.grid, grid);
+	load_map_file("map2.txt");
 
 	player.x = 2 * map.block;
-	player.y = 2 * map.block;
-	player.view_angle = 270.00;
+	player.y = 2.5 * map.block;
+	player.view_angle = 0.00;
 
 	player.fov = 60.00;
 	player.plane_dist = (win_w/2) / tanf(DEG2RAD(player.fov/2));
@@ -152,9 +137,9 @@ int main(int argc, char *argv[])
 	player.ph = (float)map.block/2; /* player's height */
 
 	int a = player.view_angle;
+	run = 1;
 
-	isRun = 1;
-	while(isRun)
+	while(run)
 	{
 		realtime = SDL_GetTicks();
 		fps = frames_count / (realtime / 1000.0);
@@ -165,16 +150,26 @@ int main(int argc, char *argv[])
 		{
 			if(sdl_event.type == SDL_QUIT)
 			{
-				isRun = 0;
+				run = 0;
 			}
 			else if(sdl_event.type == SDL_KEYDOWN)
 			{
 				switch(sdl_event.key.keysym.sym)
 				{
+					case SDLK_ESCAPE:
+						run = 0;
+						break;
+
 					/* Turn textures */
+
 					case SDLK_t:
-						if(turnTextures) turnTextures = 0;
-						else turnTextures = 1;
+						if(wallTextures_on) wallTextures_on = 0;
+						else wallTextures_on = 1;
+						break;
+
+					case SDLK_y:
+						if(planesTextures_on) planesTextures_on = 0;
+						else planesTextures_on = 1;
 						break;
 					
 					case SDLK_p:

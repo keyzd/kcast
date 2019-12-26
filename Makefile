@@ -3,7 +3,7 @@ CFLAGS = -g -Wall -pedantic -Wextra
 LDFLAGS = -lSDL2 -lSDL2_image -lm
 
 PROGNAME = kcast
-SRCMODULES = main.c renderer.c misc.c
+SRCMODULES = main.c renderer.c misc.c loader.c
 OBJMODULES = $(SRCMODULES:.c=.o)
 
 %.o: %.c %.h

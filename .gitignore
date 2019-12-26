@@ -1,5 +1,5 @@
 *.o
 kcast
-log.txt
+*.txt
 tags
-
+textures/

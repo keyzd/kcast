@@ -5,11 +5,11 @@
 
 #include "kcast.h"
 
-int RayLen;
-
 void threeD_refresh()
 {
-	clear_screen();
+
+	if(!planesTextures_on)
+		clear_screen();
 	draw_columns();
 }
 
@@ -46,7 +46,7 @@ void draw_columns()
 	int wall_i;
 	int column_y;
 
-	halffov = player.fov / 2;
+	halffov = player.fov / 2.0;
 	angle_step = player.fov / win_w;
 	angle = (int)(player.view_angle + halffov) % 360;
 	float ang;
@@ -59,8 +59,7 @@ void draw_columns()
 		column_len = get_column_len(ray_len);
 		draw_wall_column(wall_i, side, column_len, column_col, column_x, &column_y);
 
-		RayLen = ray_len;
-		if(!turnTextures)
+		if(planesTextures_on)
 			draw_floor_ceiling_columns(column_x, column_y, ang);
 
 		angle -= angle_step;
@@ -114,8 +113,8 @@ float march_by_horizontal_grid(
 	int hit;
 
 	/* There's no horizontal block sides */
-	if( ( (int)angle >= 177 && (int)angle <= 183 ) ||
-		( (int)angle >= 357 || (int)angle <= 3 ))
+	if( ( (int)angle >= 176 && (int)angle <= 184 ) ||
+		( (int)angle >= 356 || (int)angle <= 4 ))
 		return 1000000.0;
 
 	/* Finding first horiz. intersection (point A) */
@@ -142,7 +141,6 @@ float march_by_horizontal_grid(
 	currentX = Ax;
 	currentY = Ay;
 
-	/* TODO: separate this loop into function */
 	while(!hit)
 	{
 		currentGridX = currentX / map.block;
@@ -170,7 +168,6 @@ float march_by_horizontal_grid(
 	*rayY = abs(player.y - currentY);
 	rayLen = sqrt((*rayX)*(*rayX)+(*rayY)*(*rayY));
 
-	/* Fixing fisheye distortion */
 	if(!fisheye_on)
 		rayLen *= cos(DEG2RAD(fabsf(angle-player.view_angle)));
 
@@ -192,7 +189,7 @@ float march_by_vertical_grid(
 	int hit;
 
 	/* There's no vertical block sides */
-	if((int)angle == 90 || (int)angle == 270)
+	if( (int)angle == 90 || (int)angle == 270 )
 		return 1000000.0;
 
 	/* Finding first horiz. intersection (point B) */
@@ -245,7 +242,6 @@ float march_by_vertical_grid(
 	*rayY = abs(player.y - currentY);
 	rayLen = sqrt((*rayX)*(*rayX)+(*rayY)*(*rayY));
 
-	/* Fixing fisheye distortion */
 	if(!fisheye_on)
 		rayLen *= cos(DEG2RAD(fabsf(angle-player.view_angle)));
 
@@ -299,9 +295,9 @@ void set_wall_index(char wall, int *wall_i, u32 *column_col)
 
 int get_column_len(int ray_len)
 {
-	float len;
-	if(ray_len <= 0) return 1;
-	len = (float)map.block * win_h / ray_len;
+	if(ray_len <= 0)
+		return 1;
+	float len = (float)map.block * win_h / ray_len;
 	return (int)len;
 }
 
@@ -324,14 +320,14 @@ void draw_wall_column(
 	b = column_col & 255;
 
 	if(column_len >= win_h)
-		column_len = win_h-1;
+		column_len = win_h;
 
 	y_up = win_h / 2 - 1;
 	y_down = win_h / 2;
 
 	y_start = y_up - column_len / 2;
 	y_end = y_down + column_len / 2;
-	*screen_y = y_end-1;
+	*screen_y = y_end;
 
 	wall_rect_dst.h = column_len;
 	wall_rect_dst.x = column_x;
@@ -343,7 +339,7 @@ void draw_wall_column(
 	wall_rect_src.h = map.block;
 	wall_rect_src.w = 1;
 	
-	if(turnTextures)
+	if(!wallTextures_on)
 	{
 		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
 		SDL_RenderDrawLine(sdl_rend, column_x, y_start, column_x, y_end);
@@ -366,11 +362,11 @@ void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle)
 
 	beta = player.beta;
 	epsilon = (90.0-beta)/(win_h/2);
-	beta = beta;
 
 	for(int y = win_h-1 ; y > screen_y; y--)
 	{
 		floorPointDist = tanf(DEG2RAD(beta)) * player.ph;
+
 		if(!fisheye_on)
 			floorPointDist /= cos(DEG2RAD((angle-player.view_angle)));
 

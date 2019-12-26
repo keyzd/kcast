@@ -14,7 +14,6 @@
 
 typedef struct map_s
 {
-	/* TODO: invent map type and map format */
 	char *grid;
 	int block;
 	int grid_w, grid_h;
@@ -60,13 +59,15 @@ typedef struct maptext_s
 */
 
 int fisheye_on;
+int wallTextures_on;
+int planesTextures_on;
 int lowpoly_on;
+
 int win_w, win_h;
 SDL_Renderer *sdl_rend;
 SDL_Window *sdl_win;
 SDL_Texture *screen_sdl_text;
 maptext_t maptext;
-int turnTextures;
 map_t map;
 player_t player;
 SDL_Surface *floor_text;
@@ -84,6 +85,8 @@ SDL_Surface *ceil_text;
 
 #define DEG2RAD(a) ( M_PI/180 * a )
 #define RAD2DEG(a) ( 180/M_PI * a )
+
+#define DEFAULT_BLOCK_SIZE 64
 
 /*
 ========================================================================
@@ -152,4 +155,12 @@ void draw_wall_column(
 		);
 
 void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle);
+
+/*
+========================================================================
+						LOADER.C DEFINITIONS
+========================================================================
+*/
+
+void load_map_file(const char *path);
 
