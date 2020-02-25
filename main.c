@@ -12,9 +12,6 @@
 
 int main(int argc, char *argv[])
 {
-	pixel_t ppm[64*64];
-	load_ppm("textures/wood_1.ppm", ppm);
-
 	fisheye_on = 0;
 	lowpoly_on = 0;
 	wallTextures_on = 1;
@@ -74,53 +71,54 @@ int main(int argc, char *argv[])
 							PREPARING TEXTURES
 ========================================================================
 */
-	SDL_Texture *default_wall =
-		load_texture("textures/debug_text.png", &IMG_Load);
-	SDL_Texture *wall_light =
-		load_texture("textures/doompack/wall_light.png", &IMG_Load);
-	SDL_Texture *comp1 =
-		load_texture("textures/doompack/comp1.png", &IMG_Load);
-	SDL_Texture *comp2 =
-		load_texture("textures/doompack/comp2.png", &IMG_Load);
-	SDL_Texture *danger_wall =
-		load_texture("textures/doompack/danger_wall.png", &IMG_Load);
-	SDL_Texture *box =
-		load_texture("textures/doompack/q2_strogg_box.png", &IMG_Load);
-	SDL_Texture *hellsign =
-		load_texture("textures/doompack/666.png", &IMG_Load);
-	SDL_Texture *steel_wall =
-		load_texture("textures/doompack/steel_wall.png", &IMG_Load);
-	SDL_Texture *normal_wall =
-		load_texture("textures/doompack/normal_wall.png", &IMG_Load);
-	
-	//floor_text = IMG_Load("textures/wolfpack/WALL52.bmp");
-	//floor_text = IMG_Load("textures/square2.png");
+	SDL_Texture* missing_texture =
+		load_texture("textures/missing_texture.png", &IMG_Load);
+
 	floor_text =
-		IMG_Load("textures/doompack/floor.png");
+		IMG_Load("textures/wolf3d/wood_1.png");
 	floor_text =
 		SDL_ConvertSurfaceFormat(floor_text, SDL_PIXELFORMAT_ARGB8888, 0);
 
-	//ceil_text = IMG_Load("textures/wolfpack/WALL22.bmp");
-	//ceil_text = IMG_Load("textures/square.png");
 	ceil_text =
-		IMG_Load("textures/doompack/ceiling_lights2.png");
+		IMG_Load("textures/wolf3d/gray_brick_2.png");
 	ceil_text =
 		SDL_ConvertSurfaceFormat(ceil_text, SDL_PIXELFORMAT_ARGB8888, 0);
+	
+	SDL_Texture* blue_brick =
+		load_texture("textures/wolf3d/blue_brick_1.png", &IMG_Load);
+
+	SDL_Texture* gray_brick_1 =
+		load_texture("textures/wolf3d/gray_brick_1.png", &IMG_Load);
+
+	SDL_Texture* gray_brick_2 =
+		load_texture("textures/wolf3d/gray_brick_2.png", &IMG_Load);
+
+	SDL_Texture* gray_brick_3 =
+		load_texture("textures/wolf3d/gray_brick_3.png", &IMG_Load);
+
+	SDL_Texture* multicolor_brick =
+		load_texture("textures/wolf3d/multicolor_brick.png", &IMG_Load);
+
+	SDL_Texture* red_brick =
+		load_texture("textures/wolf3d/red_brick_1.png", &IMG_Load);
+
+	SDL_Texture* eagle =
+		load_texture("textures/wolf3d/eagle.png", &IMG_Load);
 
 	maptext_init();
-	maptext_insert('0', default_wall);
-	maptext_insert('1', comp1);
-	maptext_insert('2', comp2);
-	maptext_insert('3', danger_wall);
-	maptext_insert('4', box);
-	maptext_insert('5', normal_wall);
-	maptext_insert('6', hellsign);
-	maptext_insert('7', steel_wall);
+	maptext_insert('0', missing_texture);
+	maptext_insert('1', red_brick);
+	maptext_insert('2', eagle);
+	maptext_insert('3', gray_brick_1);
+	maptext_insert('4', gray_brick_2);
+	maptext_insert('5', gray_brick_3);
+	maptext_insert('6', multicolor_brick);
+	maptext_insert('7', blue_brick);
 
-	load_map_file("map2.txt");
+	load_map_file("map1.txt");
 
-	player.x = 2 * map.block;
-	player.y = 2.5 * map.block;
+	player.x = 1.5 * map.block;
+	player.y = 1.5 * map.block;
 	player.view_angle = 0.00;
 
 	player.fov = 60.00;
@@ -136,7 +134,7 @@ int main(int argc, char *argv[])
 		realtime = SDL_GetTicks();
 		fps = frames_count / (realtime / 1000.0);
 
-		//printf("FPS: %.2f\n", fps);
+		printf("FPS: %.2f\n", fps);
 
 		while(SDL_PollEvent(&sdl_event) != 0)
 		{
