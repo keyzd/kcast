@@ -57,7 +57,8 @@ void draw_columns()
 		else ang = angle;
 		ray_len = raycast(&wall_i, &side, &column_col, ang);
 		column_len = get_column_len(ray_len);
-		draw_wall_column(wall_i, side, column_len, column_col, column_x, &column_y);
+		draw_wall_column(wall_i, side, column_len,
+						 column_col, column_x, &column_y);
 
 		if(planesTextures_on)
 			draw_floor_ceiling_columns(column_x, column_y, ang);
@@ -113,8 +114,8 @@ float march_by_horizontal_grid(
 	int hit;
 
 	/* There's no horizontal block sides */
-	if( ( (int)angle >= 176 && (int)angle <= 184 ) ||
-		( (int)angle >= 356 || (int)angle <= 4 ))
+	if( ( angle >= 177.0 && angle <= 183.0 ) ||
+		( angle >= 357.0 || angle <= 3.0 ))
 		return 1000000.0;
 
 	/* Finding first horiz. intersection (point A) */
@@ -327,7 +328,7 @@ void draw_wall_column(
 
 	y_start = y_up - column_len / 2;
 	y_end = y_down + column_len / 2;
-	*screen_y = y_end;
+	*screen_y = y_end-2;
 
 	wall_rect_dst.h = column_len;
 	wall_rect_dst.x = column_x;
@@ -388,7 +389,7 @@ void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle)
 		g = (color >> 8) & 255;
 		b = color & 255;
 		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
-		SDL_RenderDrawPoint(sdl_rend, screen_x, win_h-y);
+		SDL_RenderDrawPoint(sdl_rend, screen_x, win_h-y-1);
 
 		beta += epsilon;
 	}
