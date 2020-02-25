@@ -12,6 +12,9 @@
 
 int main(int argc, char *argv[])
 {
+	pixel_t ppm[64*64];
+	load_ppm("textures/wood_1.ppm", ppm);
+
 	fisheye_on = 0;
 	lowpoly_on = 0;
 	wallTextures_on = 1;
@@ -71,19 +74,8 @@ int main(int argc, char *argv[])
 							PREPARING TEXTURES
 ========================================================================
 */
-	SDL_Texture *default_wall = load_texture("textures/debug_text.png", &IMG_Load);
-
-	/*
-	SDL_Texture *gray_brick1 = load_texture("textures/wolfpack/WALL0.bmp", &LoadBMP);
-	SDL_Texture *gray_brick2 = load_texture("textures/wolfpack/WALL68.bmp", &LoadBMP);
-	SDL_Texture *blue_brick = load_texture("textures/wolfpack/WALL16.bmp", &LoadBMP);
-	SDL_Texture *red_brick = load_texture("textures/wolfpack/WALL32.bmp", &LoadBMP);
-	SDL_Texture *red_brick_eagle =
-		load_texture("textures/wolfpack/WALL38.bmp", &LoadBMP);
-	SDL_Texture *multicolor_brick =
-		load_texture("textures/wolfpack/WALL74.bmp", &LoadBMP);
-	*/
-
+	SDL_Texture *default_wall =
+		load_texture("textures/debug_text.png", &IMG_Load);
 	SDL_Texture *wall_light =
 		load_texture("textures/doompack/wall_light.png", &IMG_Load);
 	SDL_Texture *comp1 =

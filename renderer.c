@@ -57,7 +57,8 @@ void draw_columns()
 		else ang = angle;
 		ray_len = raycast(&wall_i, &side, &column_col, ang);
 		column_len = get_column_len(ray_len);
-		draw_wall_column(wall_i, side, column_len, column_col, column_x, &column_y);
+		draw_wall_column(wall_i, side, column_len,
+						 column_col, column_x, &column_y);
 
 		if(planesTextures_on)
 			draw_floor_ceiling_columns(column_x, column_y, ang);

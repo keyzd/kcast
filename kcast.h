@@ -20,7 +20,7 @@ typedef struct map_s
 	int w, h;
 }map_t;
 
-/* */
+/* TODO */
 typedef struct sprite_s
 {
 	int x, y;
@@ -50,6 +50,11 @@ typedef struct maptext_s
 	int count;
 	int limit;
 }maptext_t;
+
+typedef struct pixel_s
+{
+	uint8_t r, g, b;
+}pixel_t;
 
 
 /*
@@ -163,4 +168,6 @@ void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle);
 */
 
 void load_map_file(const char *path);
+
+void load_ppm(const char *path, pixel_t *ppm);
 
