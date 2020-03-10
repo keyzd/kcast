@@ -354,17 +354,17 @@ void draw_wall_column(
 
 void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle)
 {
-	u8 r, g, b;
-	u32 color;
+	pixel_t col;
 
 	float beta, epsilon;
 	int floorPointDist, floorPointX, floorPointY;
 	int textureX, textureY;
 
 	beta = player.beta;
-	epsilon = (90.0-beta)/(win_h/2);
+	//epsilon = (90.0-beta)/(win_h/2);
+	epsilon = player.epsilon;
 
-	for(int y = win_h-1 ; y > screen_y; y--)
+	for(int y = win_h-1 ; y > screen_y-1; y--)
 	{
 		floorPointDist = tanf(DEG2RAD(beta)) * player.ph;
 
@@ -377,6 +377,7 @@ void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle)
 		textureX = abs(floorPointX % map.block);
 		textureY = abs(floorPointY % map.block);
 
+		/*
 		color = getpixel(floor_text, textureX, textureY);
 		r = (color >> 16) & 255;
 		g = (color >> 8) & 255;
@@ -389,6 +390,15 @@ void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle)
 		g = (color >> 8) & 255;
 		b = color & 255;
 		SDL_SetRenderDrawColor(sdl_rend, r, g, b, 255);
+		SDL_RenderDrawPoint(sdl_rend, screen_x, win_h-y);
+		*/
+
+		col = floor_ppm[textureX+textureY*64];
+		SDL_SetRenderDrawColor(sdl_rend, col.r, col.g, col.b, 255);
+		SDL_RenderDrawPoint(sdl_rend, screen_x, y);
+
+		col = ceil_ppm[textureX+textureY*64];
+		SDL_SetRenderDrawColor(sdl_rend, col.r, col.g, col.b, 255);
 		SDL_RenderDrawPoint(sdl_rend, screen_x, win_h-y);
 
 		beta += epsilon;

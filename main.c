@@ -12,6 +12,9 @@
 
 int main(int argc, char *argv[])
 {
+	load_ppm("textures/wood_1.ppm", floor_ppm);
+	load_ppm("textures/gray_brick_2.ppm", ceil_ppm);
+
 	fisheye_on = 0;
 	lowpoly_on = 0;
 	wallTextures_on = 1;
@@ -56,7 +59,7 @@ int main(int argc, char *argv[])
 		win_h,
 		fullscreen
 	);
-	sdl_rend = SDL_CreateRenderer(sdl_win, -1, SDL_RENDERER_ACCELERATED);
+	sdl_rend = SDL_CreateRenderer(sdl_win, -1, SDL_RENDERER_SOFTWARE);
 	screen_sdl_text = SDL_CreateTexture
 	(
 		sdl_rend,
@@ -115,7 +118,7 @@ int main(int argc, char *argv[])
 	maptext_insert('6', multicolor_brick);
 	maptext_insert('7', blue_brick);
 
-	load_map_file("map1.txt");
+	load_map_file("map.txt");
 
 	player.x = 1.5 * map.block;
 	player.y = 1.5 * map.block;
@@ -125,6 +128,7 @@ int main(int argc, char *argv[])
 	player.plane_dist = (win_w/2) / tanf(DEG2RAD(player.fov/2));
 	player.beta = RAD2DEG(atanf((float)player.plane_dist/(win_w/2)));
 	player.ph = (float)map.block/2; /* player's height */
+	player.epsilon = (90.0-player.beta)/(win_h/2);
 
 	int a = player.view_angle;
 	run = 1;
@@ -134,7 +138,9 @@ int main(int argc, char *argv[])
 		realtime = SDL_GetTicks();
 		fps = frames_count / (realtime / 1000.0);
 
+		/*
 		printf("FPS: %.2f\n", fps);
+		*/
 
 		while(SDL_PollEvent(&sdl_event) != 0)
 		{

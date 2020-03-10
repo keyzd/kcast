@@ -35,6 +35,7 @@ typedef struct player_s
 	float fov;
 	float plane_dist;
 	float beta;
+	float epsilon;
 	float ph;
 }player_t;
 
@@ -77,6 +78,10 @@ map_t map;
 player_t player;
 SDL_Surface *floor_text;
 SDL_Surface *ceil_text;
+
+
+pixel_t floor_ppm[64*64];
+pixel_t ceil_ppm[64*64];
 
 
 /*
