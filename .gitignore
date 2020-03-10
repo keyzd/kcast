@@ -1,6 +1,6 @@
+.gitignore
 *.o
 kcast
 *.txt
 tags
 textures/
-.*

@@ -20,7 +20,7 @@ typedef struct map_s
 	int w, h;
 }map_t;
 
-/* */
+/* TODO */
 typedef struct sprite_s
 {
 	int x, y;
@@ -35,6 +35,7 @@ typedef struct player_s
 	float fov;
 	float plane_dist;
 	float beta;
+	float epsilon;
 	float ph;
 }player_t;
 
@@ -50,6 +51,11 @@ typedef struct maptext_s
 	int count;
 	int limit;
 }maptext_t;
+
+typedef struct pixel_s
+{
+	uint8_t r, g, b;
+}pixel_t;
 
 
 /*
@@ -72,6 +78,10 @@ map_t map;
 player_t player;
 SDL_Surface *floor_text;
 SDL_Surface *ceil_text;
+
+
+pixel_t floor_ppm[64*64];
+pixel_t ceil_ppm[64*64];
 
 
 /*
@@ -163,4 +173,6 @@ void draw_floor_ceiling_columns(int screen_x, int screen_y, float angle);
 */
 
 void load_map_file(const char *path);
+
+void load_ppm(const char *path, pixel_t *ppm);
 

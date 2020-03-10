@@ -65,3 +65,42 @@ void load_map_file(const char *path)
 	fclose(map_file);
 }
 
+void load_ppm(const char *path, pixel_t *ppm)
+{
+	FILE *ppm_file = fopen(path, "r");
+	if(!ppm_file)
+	{
+		perror(path);
+		exit(1);
+	}
+
+	char str[6];
+	int ppm_arr[64*64*3];
+
+	for(int i = 0; i < 64*64*3; i++)
+	{
+		fgets(str, 6, ppm_file);
+		int n = atoi(str);
+		ppm_arr[i] = n;
+	}
+
+	int k = 0;
+
+	for(int i = 0; i < 64*64; i++)
+	{
+		pixel_t pixel;
+		pixel.r = ppm_arr[k];
+		pixel.g = ppm_arr[k+1];
+		pixel.b = ppm_arr[k+2];
+
+		ppm[i] = pixel;
+
+		/*
+		printf("%d\n", ppm[i].r);
+		printf("%d\n", ppm[i].g);
+		printf("%d\n", ppm[i].b);
+		*/
+
+		k+=3;
+	}
+}
