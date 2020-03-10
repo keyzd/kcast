@@ -1,7 +1,7 @@
 ![screenshoot](screen.png)
 
-Usage:
+Usage:   
 	```
 	make run
-	```
+	```   
 Or just run the binary and see usage help
