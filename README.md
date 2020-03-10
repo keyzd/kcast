@@ -1,2 +1,4 @@
-Usage:
+Usage:   
+	```c
 	make run
+	```
